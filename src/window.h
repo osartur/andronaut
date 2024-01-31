@@ -16,34 +16,37 @@ public:
 	void Display();
 	
 private:
-	EGLDisplay display;
-	EGLConfig  config;
-	EGLSurface surface;
-	EGLContext context;
-	int width;
-	int height;
-	bool is_open;
+	bool ChooseConfig(const int attributes[]);
+	bool MatchConfig(EGLConfig config, const int attributes[]);
+	
+	EGLDisplay m_display;
+	EGLConfig  m_config;
+	EGLSurface m_surface;
+	EGLContext m_context;
+	int m_width;
+	int m_height;
+	bool m_open;
 };
 
 
 inline int Window::Width() const
 {
-	return width;
+	return m_width;
 }
 
 inline int Window::Height() const
 {
-	return height;
+	return m_height;
 }
 
 inline bool Window::IsOpen() const
 {
-	return is_open;
+	return m_open;
 }
 
 inline void Window::Display()
 {
-	eglSwapBuffers(display, surface);
+	eglSwapBuffers(m_display, m_surface);
 }
 
 #endif

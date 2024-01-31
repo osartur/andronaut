@@ -2,6 +2,12 @@
 #include "android_native_app_glue.h"
 #include <EGL/eglext.h>
 #include <cstring>
+#include <vector>
+
+#define EGL_CALL(fcall)                   \
+        fcall;                            \
+        if (eglGetError() != EGL_SUCCESS) \
+            return false;
 
 Window::Window()
 {
@@ -12,12 +18,12 @@ bool Window::Init(ANativeWindow* window)
 {
 	const int window_attributes[] =
 	{
-		EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+		//EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+		//EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
 		EGL_RED_SIZE, 8,
 		EGL_GREEN_SIZE, 8,
 		EGL_BLUE_SIZE, 8,
-		EGL_DEPTH_SIZE, 8,
+		EGL_ALPHA_SIZE, 8,
 		EGL_NONE
 	};
 	
@@ -34,27 +40,55 @@ bool Window::Init(ANativeWindow* window)
 		EGL_NONE
 	};
 	
-	#define EGL_CALL(fcall)                   \
-            fcall;                            \
-            if (eglGetError() != EGL_SUCCESS) \
-                return false;
+	m_display = EGL_CALL(eglGetDisplay(EGL_DEFAULT_DISPLAY));
+	EGL_CALL(eglInitialize(m_display, nullptr, nullptr));
 	
-	display = EGL_CALL(eglGetDisplay(EGL_DEFAULT_DISPLAY));
-	EGL_CALL(eglInitialize(display, nullptr, nullptr));
+	if (!ChooseConfig(window_attributes))
+	{
+		return false;
+	}
 	
-	int returned_configs;
-	EGL_CALL(eglChooseConfig(display, window_attributes, &config, 1, &returned_configs));
-	surface = EGL_CALL(eglCreateWindowSurface(display, config, window, render_buffer));
+	m_surface = EGL_CALL(eglCreateWindowSurface(m_display, m_config, window, render_buffer));
+	m_context = EGL_CALL(eglCreateContext(m_display, m_config, EGL_NO_CONTEXT, gles_version));
+	EGL_CALL(eglMakeCurrent(m_display, m_surface, m_surface, m_context));
+	EGL_CALL(eglSwapInterval(m_display, 0));
 	
-	context = EGL_CALL(eglCreateContext(display, config, EGL_NO_CONTEXT, gles_version));
-	EGL_CALL(eglMakeCurrent(display, surface, surface, context));
+	m_width = ANativeWindow_getWidth(window);
+	m_height = ANativeWindow_getHeight(window);
+	m_open = true;
 	
-	#undef EGL_CALL
+	return true;
+}
+
+bool Window::ChooseConfig(const int attributes[])
+{
+	int configs_count;
+	EGL_CALL(eglChooseConfig(m_display, attributes, nullptr, 0, &configs_count));
+	std::vector<EGLConfig> matches{configs_count};
+	EGL_CALL(eglChooseConfig(m_display, attributes, matches.data(), configs_count, &configs_count));
 	
-	width = ANativeWindow_getWidth(window);
-	height = ANativeWindow_getHeight(window);
-	is_open = true;
-	
+	for (int i = 0; i < configs_count; i++)
+	{
+		if (MatchConfig(matches[i], attributes))
+		{
+			m_config = matches[i];
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Window::MatchConfig(EGLConfig config, const int attributes[])
+{
+	for (int i = 0; attributes[i] != EGL_NONE; i+=2)
+	{
+		int value;
+		EGL_CALL(eglGetConfigAttrib(m_display, config, attributes[i], &value));
+		if (value != attributes[i+1])
+		{
+			return false;
+		}
+	}
 	return true;
 }
 
@@ -62,23 +96,22 @@ void Window::Destroy()
 {
 	// nullptr = EGL_NO_*
 	
-	if (display == nullptr)
+	if (m_display == nullptr)
 	{
 		return;
 	}
 	
-	eglMakeCurrent(display, nullptr, nullptr, nullptr);
-	if (context != nullptr)
+	eglMakeCurrent(m_display, nullptr, nullptr, nullptr);
+	if (m_context != nullptr)
 	{
-		eglDestroyContext(display, context);
+		eglDestroyContext(m_display, m_context);
 	}
-	if (surface != nullptr)
+	if (m_surface != nullptr)
 	{
-		eglDestroySurface(display, surface);
+		eglDestroySurface(m_display, m_surface);
 	}
 	
-	eglTerminate(display);
+	eglTerminate(m_display);
 	
 	memset(this, 0, sizeof(Window));
 }
-
