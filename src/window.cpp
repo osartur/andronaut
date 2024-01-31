@@ -64,7 +64,8 @@ bool Window::ChooseConfig(const int attributes[])
 {
 	int configs_count;
 	EGL_CALL(eglChooseConfig(m_display, attributes, nullptr, 0, &configs_count));
-	std::vector<EGLConfig> matches{configs_count};
+	std::vector<EGLConfig> matches;
+	matches.resize(configs_count);
 	EGL_CALL(eglChooseConfig(m_display, attributes, matches.data(), configs_count, &configs_count));
 	
 	for (int i = 0; i < configs_count; i++)
