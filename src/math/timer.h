@@ -12,7 +12,7 @@ public:
 	
 	void Start();
 	void Pause();
-	float Reset();
+	float Restart();
 	float Elapsed() const;
 	bool Elapsed(float secs) const;
 	bool IsPaused() const;

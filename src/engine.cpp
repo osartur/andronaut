@@ -45,7 +45,7 @@ Engine::~Engine()
 int Engine::Start(Activity* main_act)
 {
 	main_activity = main_act;
-	main_activity->OnCreate(); // todo: savedInstance arg
+	main_activity->OnCreate(android->savedState);
 	state = STOPPED;
 	
 	while (true)
@@ -65,7 +65,7 @@ int Engine::Start(Activity* main_act)
 		}
 		main_activity->OnDrawFrame();
 		window->Display();
-		main_activity->OnUpdate(counter->Reset());
+		main_activity->OnUpdate(counter->Restart());
 	}
 }
 
@@ -128,7 +128,7 @@ void Engine::ActivityProc(int cmd)
 			break;
 			
 		case APP_CMD_SAVE_STATE:
-			//main_activity->OnSaveInstanceState();
+			main_activity->OnSaveInstanceState(&android->savedState);
 			break;
 			
 		case APP_CMD_WINDOW_REDRAW_NEEDED:

@@ -6,8 +6,8 @@ using std::chrono::duration;
 
 Timer::Timer()
 {
-	m_paused = true;
-	m_start = m_end = Now();
+	m_paused = false;
+	Start();
 }
 
 void Timer::Start()
@@ -33,19 +33,20 @@ void Timer::Pause()
 	}
 }
 
-float Timer::Reset()
+float Timer::Restart()
 {
 	high_resolution_clock::duration elapsed;
 	if (m_paused)
 	{
 		elapsed = m_end - m_start;
-		m_start = m_end;
+		m_start = Now() - elapsed;
+		m_paused = false;
 	}
 	else
 	{
-		m_end = Now();
-		elapsed = m_end - m_start;
-		m_start = m_end;
+		auto now = Now();
+		elapsed = now - m_start;
+		m_start = now;
 	}
 	return duration_cast<duration<float>>(elapsed).count();
 }

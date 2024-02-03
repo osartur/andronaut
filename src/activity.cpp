@@ -7,7 +7,7 @@ Window* Activity::window = nullptr;
 Input* Activity::input = nullptr;
 Engine* Activity::engine = nullptr;
 
-void Activity::OnCreate()
+void Activity::OnCreate(void* saved_state)
 {
 	
 }
@@ -33,6 +33,11 @@ void Activity::OnStop()
 }
 
 void Activity::OnDestroy()
+{
+	
+}
+
+void Activity::OnSaveInstanceState(void** saved_state)
 {
 	
 }

@@ -13,12 +13,13 @@ public:
 	static Input* input;
 	static Engine* engine;
 	
-	virtual void OnCreate();
+	virtual void OnCreate(void* saved_state);
 	virtual void OnStart();
 	virtual void OnResume();
 	virtual void OnPause();
 	virtual void OnStop();
 	virtual void OnDestroy();
+	virtual void OnSaveInstanceState(void** saved_state);
 	
 	virtual void OnSurfaceCreated();
 	virtual void OnSurfaceChanged(int w, int h);
