@@ -1,283 +1,131 @@
-/*********************************************************
-   4d vector class
-   Copyright © 2021 Mark Craig
+/*
+ * Copyright 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-   https://www.youtube.com/MrMcSoftware
-**********************************************************/
+#if not defined(ANUT_VEC4_H)
+#define ANUT_VEC4_H
 
-#ifndef _VEC4_H
-#define _VEC4_H
+#include <math/vec3.h>
+#include <math/half.h>
+#include <stdint.h>
+#include <sys/types.h>
 
-#include <cmath>
-#include <iostream>
-#include <cassert>
-#include "math/vec2.h"
-#include "math/vec3.h"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#pragma clang diagnostic ignored "-Wnested-anon-types"
 
-template <class T>
-class Vec4
-	{
-	public:
-		union
-			{
-			struct { T x,y,z,w; };
-			struct { T r,g,b,a; };
-			struct { T V[4]; };
-			};
+namespace android {
+// -------------------------------------------------------------------------------------
 
-		Vec4<T>() { x=y=z=w=0; }
+namespace details {
 
-		Vec4<T>(T cx, T cy, T cz, T cw) { x=cx; y=cy; z=cz; w=cw; }
+template <typename T>
+class  TVec4 :  public TVecProductOperators<TVec4, T>,
+                public TVecAddOperators<TVec4, T>,
+                public TVecUnaryOperators<TVec4, T>,
+                public TVecComparisonOperators<TVec4, T>,
+                public TVecFunctions<TVec4, T>,
+                public TVecDebug<TVec4, T> {
+public:
+    enum no_init { NO_INIT };
+    typedef T value_type;
+    typedef T& reference;
+    typedef T const& const_reference;
+    typedef size_t size_type;
 
-		Vec4<T>(T cx) { x=y=z=w=cx; }
+    union {
+        struct { T x, y, z, w; };
+        struct { T s, t, p, q; };
+        struct { T r, g, b, a; };
+        TVec2<T> xy;
+        TVec2<T> st;
+        TVec2<T> rg;
+        TVec3<T> xyz;
+        TVec3<T> stp;
+        TVec3<T> rgb;
+    };
 
-		Vec4<T>(Vec3<T> v, T cw) { x=v.x; y=v.y; z=v.z; w=cw; }
+    static constexpr size_t SIZE = 4;
+    inline constexpr size_type size() const { return SIZE; }
 
-		Vec4<T>(const Vec4<T> &v) { x=v.x; y=v.y; z=v.z; w=v.w; }
-
-		Vec4<T>(T v[4]) { x=v[0]; y=v[1]; z=v[2]; w=v[3]; }
-
-		inline Vec2<T> xy() const
-			{
-			return(Vec2<T>(x,y));
-			}
-
-		inline Vec3<T> xyz() const
-			{
-			return(Vec3<T>(x,y,z));
-			}
-
-		inline T dot() const
-			{
-			T r=x*x+y*y+z*z+w*w;
-			return(r);
-			}
-
-		inline T dot(const Vec4<T> &q) const
-			{
-			T r=x*q.x+y*q.y+z*q.z+w*q.w;
-			return(r);
-			}
-
-		inline T length() const
-			{
-			T r=sqrt(x*x+y*y+z*z+w*w);
-			return(r);
-			}
-
-		inline Vec4<T> const normalized() const
-			{
-			T mag=sqrt(x*x+y*y+z*z+w*w);
-			if (mag!=0.0)
-				{
-				Vec4<T> r;
-				r.x=x/mag; r.y=y/mag; r.z=z/mag; r.w=w/mag;
-				return(r);
-				}
-			return(Vec4<T>(0.0,0.0,0.0,0.0));
-			}
-
-		inline T normalize()
-			{
-			T mag=sqrt(x*x+y*y+z*z+w*w);
-			if (mag!=0.0) { x/=mag; y/=mag; z/=mag; w/=mag; }
-			else { x=y=z=w=0.0; }
-			return(mag);
-			}
-
-		inline T operator[] (int i) const
-			{
-			assert((i>=0)&&(i<4));
-			return(V[i]);
-			}
-
-		inline T& operator[] (int i)
-			{
-			assert((i>=0)&&(i<4));
-			return(V[i]);
-			}
-
-	friend Vec4<T> operator+ (const Vec4<T> &L, const Vec4<T> &R)
-		{
-		Vec4<T> c; c.x=L.x+R.x; c.y=L.y+R.y; c.z=L.z+R.z; c.w=L.w+R.w; return(c);
-		}
-
-	friend Vec4<T> operator+ (const Vec4<T> &L, const T &R)
-		{
-		Vec4<T> c; c.x=L.x+R; c.y=L.y+R; c.z=L.z+R; c.w=L.w+R; return(c);
-		}
-
-	friend Vec4<T> operator+ (const T &L, const Vec4<T> &R)
-		{
-		Vec4<T> c; c.x=L+R.x; c.y=L+R.y; c.z=L+R.z; c.w=L+R.w; return(c);
-		}
-
-	friend Vec4<T> operator- (const Vec4<T> &R)
-		{
-		Vec4<T> c; c.x=-R.x; c.y=-R.y; c.z=-R.z; c.w=-R.w; return(c);
-		}
-
-	friend Vec4<T> operator- (const Vec4<T> &L, const Vec4<T> &R)
-		{
-		Vec4<T> c; c.x=L.x-R.x; c.y=L.y-R.y; c.z=L.z-R.z; c.w=L.w-R.w; return(c);
-		}
-
-	friend Vec4<T> operator- (const Vec4<T> &L, const T &R)
-		{
-		Vec4<T> c; c.x=L.x-R; c.y=L.y-R; c.z=L.z-R; c.w=L.w-R; return(c);
-		}
-
-	friend Vec4<T> operator- (const T &L, const Vec4<T> &R)
-		{
-		Vec4<T> c; c.x=L-R.x; c.y=L-R.y; c.z=L-R.z; c.w=L-R.w; return(c);
-		}
-
-	friend Vec4<T> operator* (const Vec4<T> &L, const Vec4<T> &R)
-		{
-		Vec4<T> c;
-		c.x=R.x*L.x; c.y=R.y*L.y; c.z=R.z*L.z; c.w=R.w*L.w;
-		return(c);
-		}
-
-	friend Vec4<T> operator* (const T &L, const Vec4<T> &R)
-		{
-		Vec4<T> c;
-		c.x=R.x*L; c.y=R.y*L; c.z=R.z*L; c.w=R.w*L;
-		return(c);
-		}
-
-	friend Vec4<T> operator* (const Vec4<T> &L, const T &R)
-		{
-		return(R*L);
-		}
-
-	friend Vec4<T> operator/ (const Vec4<T> &L, const Vec4<T> &R)
-		{
-		Vec4<T> c;
-		c.x=L.x/R.x; c.y=L.y/R.y; c.z=L.z/R.z; c.w=L.w/R.w;
-		return(c);
-		}
-
-	friend Vec4<T> operator/ (const Vec4<T> &L, const T &R)
-		{
-		Vec4<T> c;
-		c.x=L.x/R; c.y=L.y/R; c.z=L.z/R; c.w=L.w/R;
-		return(c);
-		}
-
-	friend Vec4<T>& operator+= (Vec4<T> &L, const Vec4<T> &R)
-		{
-		L.x+=R.x; L.y+=R.y; L.z+=R.z; L.w+=R.w;
-		return(L);
-		}
-
-	friend Vec4<T>& operator+= (Vec4<T> &L, const T &R)
-		{
-		L.x+=R; L.y+=R; L.z+=R; L.w+=R;
-		return(L);
-		}
-
-	friend Vec4<T>& operator-= (Vec4<T> &L, const Vec4<T> &R)
-		{
-		L.x-=R.x; L.y-=R.y; L.z-=R.z; L.w-=R.w;
-		return(L);
-		}
-
-	friend Vec4<T>& operator-= (Vec4<T> &L, const T &R)
-		{
-		L.x-=R; L.y-=R; L.z-=R; L.w-=R;
-		return(L);
-		}
-
-	friend Vec4<T>& operator*= (Vec4<T> &L, const Vec4<T> &R)
-		{
-		L.x*=R.x; L.y*=R.y; L.z*=R.z; L.w*=R.w;
-		return(L);
-		}
-
-	friend Vec4<T>& operator*= (Vec4<T> &L, const T &R)
-		{
-		L.x*=R; L.y*=R; L.z*=R; L.w*=R;
-		return(L);
-		}
-
-	friend Vec4<T>& operator/= (Vec4<T> &L, const Vec4<T> &R)
-		{
-		L.x/=R.x; L.y/=R.y; L.z/=R.z; L.w/=R.w;
-		return(L);
-		}
-
-	friend Vec4<T>& operator/= (Vec4<T> &L, const T &R)
-		{
-		L.x/=R; L.y/=R; L.z/=R; L.w/=R;
-		return(L);
-		}
-
-	friend Vec4<T>& operator++ (Vec4<T> &R)
-		{
-		++R.x; ++R.y; ++R.z; ++R.w;
-		return(R);
-		}
-
-	friend Vec4<T> operator++ (Vec4<T> &L, int)
-		{
-		Vec4<T> c=L;
-		L.x++; L.y++; L.z++; L.w++;
-		return(c);
-		}
-
-	friend Vec4<T>& operator-- (Vec4<T> &R)
-		{
-		--R.x; --R.y; --R.z; --R.w;
-		return(R);
-		}
-
-	friend Vec4<T> operator-- (Vec4<T> &L, int)
-		{
-		Vec4<T> c=L;
-		L.x--; L.y--; L.z--; L.w--;
-		return(c);
-		}
-
-#ifdef EPSILONCOMP
-
-#define eq(a,b) (fabs(a-b)<EPSILONCOMP)
-#define ne(a,b) (fabs(a-b)>=EPSILONCOMP)
-
-	friend bool operator== (const Vec4<T> &L, const Vec4<T> &R)
-		{
-		return((eq(L.x,R.x))&&(eq(L.y,R.y))&&(eq(L.z,R.z))&&(eq(L.w,R.w)));
-		}
-
-	friend bool operator!= (const Vec4<T> &L, const Vec4<T> &R)
-		{
-		return((ne(L.x,R.x))||(ne(L.y,R.y))||(ne(L.z,R.z))||(ne(L.w,R.w)));
-		}
-
-#undef eq
-#undef ne
-
-#else
-
-	friend bool operator== (const Vec4<T> &L, const Vec4<T> &R)
-		{
-		return((L.x==R.x)&&(L.y==R.y)&&(L.z==R.z)&&(L.w==R.w));
-		}
-
-	friend bool operator!= (const Vec4<T> &L, const Vec4<T> &R)
-		{
-		return((L.x!=R.x)||(L.y!=R.y)||(L.z!=R.z)||(L.w!=R.w));
-		}
-
+    // array access
+    inline constexpr T const& operator[](size_t i) const {
+#if __cplusplus >= 201402L
+        // only possible in C++0x14 with constexpr
+        assert(i < SIZE);
 #endif
+        return (&x)[i];
+    }
 
-	friend std::ostream& operator<< (std::ostream &os, const Vec4<T> &R)
-		{
-		os << "(" << R.x << "," << R.y << "," << R.z << "," << R.w << ")";
-		return(os);
-		}
-	};
+    inline T& operator[](size_t i) {
+        assert(i < SIZE);
+        return (&x)[i];
+    }
 
-typedef Vec4<float> vec4;
+    // -----------------------------------------------------------------------
+    // we want the compiler generated versions for these...
+    TVec4(const TVec4&) = default;
+    ~TVec4() = default;
+    TVec4& operator = (const TVec4&) = default;
+
+    // constructors
+
+    // leaves object uninitialized. use with caution.
+    explicit
+    constexpr TVec4(no_init) { }
+
+    // default constructor
+    constexpr TVec4() : x(0), y(0), z(0), w(0) { }
+
+    // handles implicit conversion to a tvec4. must not be explicit.
+    template<typename A, typename = typename std::enable_if<std::is_arithmetic<A>::value >::type>
+    constexpr TVec4(A v) : x(v), y(v), z(v), w(v) { }
+
+    template<typename A, typename B, typename C, typename D>
+    constexpr TVec4(A x, B y, C z, D w) : x(x), y(y), z(z), w(w) { }
+
+    template<typename A, typename B, typename C>
+    constexpr TVec4(const TVec2<A>& v, B z, C w) : x(v.x), y(v.y), z(z), w(w) { }
+
+    template<typename A, typename B>
+    constexpr TVec4(const TVec3<A>& v, B w) : x(v.x), y(v.y), z(v.z), w(w) { }
+
+    template<typename A>
+    explicit
+    constexpr TVec4(const TVec4<A>& v) : x(v.x), y(v.y), z(v.z), w(v.w) { }
+};
+
+}  // namespace details
+
+// ----------------------------------------------------------------------------------------
+
+typedef details::TVec4<double> double4;
+typedef details::TVec4<float> float4;
+typedef details::TVec4<float> vec4;
+typedef details::TVec4<half> half4;
+typedef details::TVec4<int32_t> int4;
+typedef details::TVec4<uint32_t> uint4;
+typedef details::TVec4<int16_t> short4;
+typedef details::TVec4<uint16_t> ushort4;
+typedef details::TVec4<int8_t> byte4;
+typedef details::TVec4<uint8_t> ubyte4;
+typedef details::TVec4<bool> bool4;
+
+// ----------------------------------------------------------------------------------------
+}  // namespace android
+
+#pragma clang diagnostic pop
 
 #endif

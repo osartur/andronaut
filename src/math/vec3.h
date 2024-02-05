@@ -1,290 +1,134 @@
-/*********************************************************
-   3d vector class
-   Copyright © 2021 Mark Craig
+/*
+ * Copyright 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-   https://www.youtube.com/MrMcSoftware
-**********************************************************/
+#if not defined(ANUT_VEC3_H)
+#define ANUT_VEC3_H
 
-#ifndef _VEC3_H
-#define _VEC3_H
+#include <math/vec2.h>
+#include <math/half.h>
+#include <stdint.h>
+#include <sys/types.h>
 
-#include <cmath>
-#include <iostream>
-#include <cassert>
-#include "math/vec2.h"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#pragma clang diagnostic ignored "-Wnested-anon-types"
 
-template <class T>
-class Vec3
-	{
-	public:
-		union
-			{
-			struct { T x,y,z; };
-			struct { T r,g,b; };
-			struct { T V[3]; };
-			};
+namespace android {
+// -------------------------------------------------------------------------------------
 
-		Vec3<T>() { x=y=z=0; }
+namespace details {
 
-		Vec3<T>(T cx, T cy, T cz) { x=cx; y=cy; z=cz; }
+template <typename T>
+class TVec3 :   public TVecProductOperators<TVec3, T>,
+                public TVecAddOperators<TVec3, T>,
+                public TVecUnaryOperators<TVec3, T>,
+                public TVecComparisonOperators<TVec3, T>,
+                public TVecFunctions<TVec3, T>,
+                public TVecDebug<TVec3, T> {
+public:
+    enum no_init { NO_INIT };
+    typedef T value_type;
+    typedef T& reference;
+    typedef T const& const_reference;
+    typedef size_t size_type;
 
-		Vec3<T>(T cx) { x=y=z=cx; }
+    union {
+        struct { T x, y, z; };
+        struct { T s, t, p; };
+        struct { T r, g, b; };
+        TVec2<T> xy;
+        TVec2<T> st;
+        TVec2<T> rg;
+    };
 
-		Vec3<T>(Vec2<T> v, T cz) { x=v.x; y=v.y; z=cz; }
+    static constexpr size_t SIZE = 3;
+    inline constexpr size_type size() const { return SIZE; }
 
-		Vec3<T>(const Vec3<T> &v) { x=v.x; y=v.y; z=v.z; }
-
-		Vec3<T>(T v[3]) { x=v[0]; y=v[1]; z=v[2]; }
-
-		inline Vec2<T> xy() const
-			{
-			return(Vec2<T>(x,y));
-			}
-
-		inline T dot() const
-			{
-			T r=x*x+y*y+z*z;
-			return(r);
-			}
-
-		inline T dot(const Vec3<T> &q) const
-			{
-			T r=x*q.x+y*q.y+z*q.z;
-			return(r);
-			}
-
-		inline Vec3<T> cross(const Vec3<T> &q) const
-			{
-			Vec3<T> v1;
-			v1.x=y*q.z-z*q.y;
-			v1.y=z*q.x-x*q.z;
-			v1.z=x*q.y-y*q.x;
-			return(v1);
-			}
-
-		inline T length() const
-			{
-			T r=sqrt(x*x+y*y+z*z);
-			return(r);
-			}
-
-		inline Vec3<T> const normalized() const
-			{
-			T mag=sqrt(x*x+y*y+z*z);
-			if (mag!=0.0)
-				{
-				Vec3<T> r;
-				r.x=x/mag; r.y=y/mag; r.z=z/mag;
-				return(r);
-				}
-			return(Vec3<T>(0.0,0.0,0.0));
-			}
-
-		inline T normalize()
-			{
-			T mag=sqrt(x*x+y*y+z*z);
-			if (mag!=0.0) { x/=mag; y/=mag; z/=mag; }
-			else { x=y=z=0.0; }
-			return(mag);
-			}
-
-		// this one used if "const vec3 variable" or sometimes if "var1=var2[2]"
-		//    Note: apparently, T& will also work
-		inline T operator[] (int i) const
-			{
-			assert((i>=0)&&(i<3));
-			return(V[i]);
-			}
-
-		// this one used if "var1=var2[2]" or if "var2[2]=var1"
-		inline T& operator[] (int i)
-			{
-			assert((i>=0)&&(i<3));
-			return(V[i]);
-			}
-
-	friend Vec3<T> operator+ (const Vec3<T> &L, const Vec3<T> &R)
-		{
-		Vec3<T> c; c.x=L.x+R.x; c.y=L.y+R.y; c.z=L.z+R.z; return(c);
-		}
-
-	friend Vec3<T> operator+ (const Vec3<T> &L, const T &R)
-		{
-		Vec3<T> c; c.x=L.x+R; c.y=L.y+R; c.z=L.z+R; return(c);
-		}
-
-	friend Vec3<T> operator+ (const T &L, const Vec3<T> &R)
-		{
-		Vec3<T> c; c.x=L+R.x; c.y=L+R.y; c.z=L+R.z; return(c);
-		}
-
-	friend Vec3<T> operator- (const Vec3<T> &R)
-		{
-		Vec3<T> c; c.x=-R.x; c.y=-R.y; c.z=-R.z; return(c);
-		}
-
-	friend Vec3<T> operator- (const Vec3<T> &L, const Vec3<T> &R)
-		{
-		Vec3<T> c; c.x=L.x-R.x; c.y=L.y-R.y; c.z=L.z-R.z; return(c);
-		}
-
-	friend Vec3<T> operator- (const Vec3<T> &L, const T &R)
-		{
-		Vec3<T> c; c.x=L.x-R; c.y=L.y-R; c.z=L.z-R; return(c);
-		}
-
-	friend Vec3<T> operator- (const T &L, const Vec3<T> &R)
-		{
-		Vec3<T> c; c.x=L-R.x; c.y=L-R.y; c.z=L-R.z; return(c);
-		}
-
-	friend Vec3<T> operator* (const Vec3<T> &L, const Vec3<T> &R)
-		{
-		Vec3<T> c;
-		c.x=R.x*L.x; c.y=R.y*L.y; c.z=R.z*L.z;
-		return(c);
-		}
-
-	friend Vec3<T> operator* (const T &L, const Vec3<T> &R)
-		{
-		Vec3<T> c;
-		c.x=R.x*L; c.y=R.y*L; c.z=R.z*L;
-		return(c);
-		}
-
-	friend Vec3<T> operator* (const Vec3<T> &L, const T &R)
-		{
-		return(R*L);
-		}
-
-	friend Vec3<T> operator/ (const Vec3<T> &L, const Vec3<T> &R)
-		{
-		Vec3<T> c;
-		c.x=L.x/R.x; c.y=L.y/R.y; c.z=L.z/R.z;
-		return(c);
-		}
-
-	friend Vec3<T> operator/ (const Vec3<T> &L, const T &R)
-		{
-		Vec3<T> c;
-		c.x=L.x/R; c.y=L.y/R; c.z=L.z/R;
-		return(c);
-		}
-
-	friend Vec3<T>& operator+= (Vec3<T> &L, const Vec3<T> &R)
-		{
-		L.x+=R.x; L.y+=R.y; L.z+=R.z;
-		return(L);
-		}
-
-	friend Vec3<T>& operator+= (Vec3<T> &L, const T &R)
-		{
-		L.x+=R; L.y+=R; L.z+=R;
-		return(L);
-		}
-
-	friend Vec3<T>& operator-= (Vec3<T> &L, const Vec3<T> &R)
-		{
-		L.x-=R.x; L.y-=R.y; L.z-=R.z;
-		return(L);
-		}
-
-	friend Vec3<T>& operator-= (Vec3<T> &L, const T &R)
-		{
-		L.x-=R; L.y-=R; L.z-=R;
-		return(L);
-		}
-
-	friend Vec3<T>& operator*= (Vec3<T> &L, const Vec3<T> &R)
-		{
-		L.x*=R.x; L.y*=R.y; L.z*=R.z;
-		return(L);
-		}
-
-	friend Vec3<T>& operator*= (Vec3<T> &L, const T &R)
-		{
-		L.x*=R; L.y*=R; L.z*=R;
-		return(L);
-		}
-
-	friend Vec3<T>& operator/= (Vec3<T> &L, const Vec3<T> &R)
-		{
-		L.x/=R.x; L.y/=R.y; L.z/=R.z;
-		return(L);
-		}
-
-	friend Vec3<T>& operator/= (Vec3<T> &L, const T &R)
-		{
-		L.x/=R; L.y/=R; L.z/=R;
-		return(L);
-		}
-
-	friend Vec3<T>& operator++ (Vec3<T> &R)
-		{
-		++R.x; ++R.y; ++R.z;
-		return(R);
-		}
-
-	friend Vec3<T> operator++ (Vec3<T> &L, int)
-		{
-		Vec3<T> c=L;
-		L.x++; L.y++; L.z++;
-		return(c);
-		}
-
-	friend Vec3<T>& operator-- (Vec3<T> &R)
-		{
-		--R.x; --R.y; --R.z;
-		return(R);
-		}
-
-	friend Vec3<T> operator-- (Vec3<T> &L, int)
-		{
-		Vec3<T> c=L;
-		L.x--; L.y--; L.z--;
-		return(c);
-		}
-
-#ifdef EPSILONCOMP
-
-#define eq(a,b) (fabs(a-b)<EPSILONCOMP)
-#define ne(a,b) (fabs(a-b)>=EPSILONCOMP)
-
-	friend bool operator== (const Vec3<T> &L, const Vec3<T> &R)
-		{
-		return((eq(L.x,R.x))&&(eq(L.y,R.y))&&(eq(L.z,R.z)));
-		}
-
-	friend bool operator!= (const Vec3<T> &L, const Vec3<T> &R)
-		{
-		return((ne(L.x,R.x))||(ne(L.y,R.y))||(ne(L.z,R.z)));
-		}
-
-#undef eq
-#undef ne
-
-#else
-
-	friend bool operator== (const Vec3<T> &L, const Vec3<T> &R)
-		{
-		return((L.x==R.x)&&(L.y==R.y)&&(L.z==R.z));
-		}
-
-	friend bool operator!= (const Vec3<T> &L, const Vec3<T> &R)
-		{
-		return((L.x!=R.x)||(L.y!=R.y)||(L.z!=R.z));
-		}
-
+    // array access
+    inline constexpr T const& operator[](size_t i) const {
+#if __cplusplus >= 201402L
+        // only possible in C++0x14 with constexpr
+        assert(i < SIZE);
 #endif
+        return (&x)[i];
+    }
 
-	friend std::ostream& operator<< (std::ostream &os, const Vec3<T> &R)
-		{
-		os << "(" << R.x << "," << R.y << "," << R.z << ")";
-		return(os);
-		}
-	};
+    inline T& operator[](size_t i) {
+        assert(i < SIZE);
+        return (&x)[i];
+    }
 
-typedef Vec3<float> vec3;
-typedef Vec3<int> ivec3;
+    // -----------------------------------------------------------------------
+    // we want the compiler generated versions for these...
+    TVec3(const TVec3&) = default;
+    ~TVec3() = default;
+    TVec3& operator = (const TVec3&) = default;
+
+    // constructors
+    // leaves object uninitialized. use with caution.
+    explicit
+    constexpr TVec3(no_init) { }
+
+    // default constructor
+    constexpr TVec3() : x(0), y(0), z(0) { }
+
+    // handles implicit conversion to a tvec4. must not be explicit.
+    template<typename A, typename = typename std::enable_if<std::is_arithmetic<A>::value >::type>
+    constexpr TVec3(A v) : x(static_cast<T>(v)), y(static_cast<T>(v)), z(static_cast<T>(v)) { }
+
+    template<typename A, typename B, typename C>
+    constexpr TVec3(A x, B y, C z) : x(static_cast<T>(x)), y(static_cast<T>(y)), z(static_cast<T>(z)) { }
+
+    template<typename A, typename B>
+    constexpr TVec3(const TVec2<A>& v, B z) : x(v.x), y(v.y), z(static_cast<T>(z)) { }
+
+    template<typename A>
+    explicit
+    constexpr TVec3(const TVec3<A>& v) : x(v.x), y(v.y), z(v.z) { }
+
+    // cross product works only on vectors of size 3
+    template <typename RT>
+    friend inline
+    constexpr TVec3 cross(const TVec3& u, const TVec3<RT>& v) {
+        return TVec3(
+                u.y*v.z - u.z*v.y,
+                u.z*v.x - u.x*v.z,
+                u.x*v.y - u.y*v.x);
+    }
+};
+
+}  // namespace details
+
+// ----------------------------------------------------------------------------------------
+
+typedef details::TVec3<double> double3;
+typedef details::TVec3<float> float3;
+typedef details::TVec3<float> vec3;
+typedef details::TVec3<half> half3;
+typedef details::TVec3<int32_t> int3;
+typedef details::TVec3<uint32_t> uint3;
+typedef details::TVec3<int16_t> short3;
+typedef details::TVec3<uint16_t> ushort3;
+typedef details::TVec3<int8_t> byte3;
+typedef details::TVec3<uint8_t> ubyte3;
+typedef details::TVec3<bool> bool3;
+
+// ----------------------------------------------------------------------------------------
+}  // namespace android
+
+#pragma clang diagnostic pop
 
 #endif

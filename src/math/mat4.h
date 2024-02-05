@@ -1,328 +1,589 @@
-/*********************************************************
-   4x4 matrix class
-   Copyright © 2021 Mark Craig
+/*
+ * Copyright 2013 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-   https://www.youtube.com/MrMcSoftware
-**********************************************************/
+#if not defined(ANUT_MAT4_H)
+#define ANUT_MAT4_H
 
-#ifndef _MAT4_H
-#define _MAT4_H
+#include <math/mat3.h>
+#include <math/quat.h>
+#include <math/TMatHelpers.h>
+#include <math/vec3.h>
+#include <math/vec4.h>
 
-#include <cstdio>
-#include <cmath>
-#include <iostream>
-#include <iomanip>
-#include "math/vec4.h"
+#include <stdint.h>
+#include <sys/types.h>
+#include <limits>
 
-template <class T>
-class Mat4
-	{
-	public:
-		union
-			{
-			struct { T m[4][4]; };
-			struct { T M[16]; };
-			struct { T x0,x1,x2,x3,y0,y1,y2,y3,z0,z1,z2,z3,w0,w1,w2,w3; };
-			};
+#define PURE __attribute__((pure))
 
-		Mat4<T>() { x0=y0=z0=w0=x1=y1=z1=w1=x2=y2=z2=w2=x3=y3=z3=w3=0; }
-
-		Mat4<T>(T X0) { y0=z0=w0=x1=z1=w1=x2=y2=w2=x3=y3=z3=0; x0=y1=z2=w3=X0; }
-
-		Mat4<T>(T X0, T Y0, T Z0, T W0, T X1, T Y1, T Z1, T W1, T X2, T Y2, T Z2, T W2, T X3, T Y3, T Z3, T W3)
-			{ x0=X0; y0=Y0; z0=Z0; w0=W0; x1=X1; y1=Y1; z1=Z1; w1=W1; x2=X2; y2=Y2; z2=Z2; w2=W2; x3=X3; y3=Y3; z3=Z3; w3=W3; }
-
-		Mat4<T>(Vec4<T> v1, Vec4<T> v2, Vec4<T> v3, Vec4<T> v4)
-			{ x0=v1.x; y0=v1.y; z0=v1.z; w0=v1.w; x1=v2.x; y1=v2.y; z1=v2.z; w1=v2.w; x2=v3.x; y2=v3.y; z2=v3.z; w2=v3.w; x3=v4.x; y3=v4.y; z3=v4.z; w3=v4.w; }
-
-		Mat4<T>(const Mat4<T> &v)
-			{ x0=v.x0; y0=v.y0; z0=v.z0; w0=v.w0; x1=v.x1; y1=v.y1; z1=v.z1; w1=v.w1; x2=v.x2; y2=v.y2; z2=v.z2; w2=v.w2; x3=v.x3; y3=v.y3; z3=v.z3; w3=v.w3; }
-
-		inline Mat4<T> const transpose() const
-			{
-			Mat4<T> trans;
-			trans.m[0][0]=m[0][0]; trans.m[1][0]=m[0][1]; trans.m[2][0]=m[0][2];
-			trans.m[3][0]=m[0][3];
-			trans.m[0][1]=m[1][0]; trans.m[1][1]=m[1][1]; trans.m[2][1]=m[1][2];
-			trans.m[3][1]=m[1][3];
-			trans.m[0][2]=m[2][0]; trans.m[1][2]=m[2][1]; trans.m[2][2]=m[2][2];
-			trans.m[3][2]=m[2][3];
-			trans.m[0][3]=m[3][0]; trans.m[1][3]=m[3][1]; trans.m[2][3]=m[3][2];
-			trans.m[3][3]=m[3][3];
-			return(trans);
-			}
-
-		/* I didn't feel like deriving determinant and inverse of 4x4 matrix -
-			these are based on GLM (Copyright (c) 2005 - G-Truc Creation) */
-
-		inline T const determinant() const
-			{
-			T f0=m[2][2]*m[3][3]-m[2][3]*m[3][2];
-			T f1=m[1][2]*m[3][3]-m[1][3]*m[3][2];
-			T f2=m[1][2]*m[2][3]-m[1][3]*m[2][2];
-			T f3=m[0][2]*m[3][3]-m[0][3]*m[3][2];
-			T f4=m[0][2]*m[2][3]-m[0][3]*m[2][2];
-			T f5=m[0][2]*m[1][3]-m[0][3]*m[1][2];
-			Vec4<T> dc=Vec4<T>((m[1][1]*f0-m[2][1]*f1+m[3][1]*f2),-(m[0][1]*f0-m[2][1]*f3+m[3][1]*f4),(m[0][1]*f1-m[1][1]*f3+m[3][1]*f5),
-				-(m[0][1]*f2-m[1][1]*f4+m[2][1]*f5));
-			return(m[0][0]*dc.x+m[1][0]*dc.y+m[2][0]*dc.z+m[3][0]*dc.w);
-			}
-
-		inline Mat4<T> const inverse() const
-			{
-			T c00=m[2][2]*m[3][3]-m[2][3]*m[3][2];
-			T c02=m[2][1]*m[3][3]-m[2][3]*m[3][1];
-			T c03=m[2][1]*m[3][2]-m[2][2]*m[3][1];
-			T c04=m[1][2]*m[3][3]-m[1][3]*m[3][2];
-			T c06=m[1][1]*m[3][3]-m[1][3]*m[3][1];
-			T c07=m[1][1]*m[3][2]-m[1][2]*m[3][1];
-			T c08=m[1][2]*m[2][3]-m[1][3]*m[2][2];
-			T c10=m[1][1]*m[2][3]-m[1][3]*m[2][1];
-			T c11=m[1][1]*m[2][2]-m[1][2]*m[2][1];
-			T c12=m[0][2]*m[3][3]-m[0][3]*m[3][2];
-			T c14=m[0][1]*m[3][3]-m[0][3]*m[3][1];
-			T c15=m[0][1]*m[3][2]-m[0][2]*m[3][1];
-			T c16=m[0][2]*m[2][3]-m[0][3]*m[2][2];
-			T c18=m[0][1]*m[2][3]-m[0][3]*m[2][1];
-			T c19=m[0][1]*m[2][2]-m[0][2]*m[2][1];
-			T c20=m[0][2]*m[1][3]-m[0][3]*m[1][2];
-			T c22=m[0][1]*m[1][3]-m[0][3]*m[1][1];
-			T c23=m[0][1]*m[1][2]-m[0][2]*m[1][1];
-			Vec4<T> f0(c00,c00,c02,c03);
-			Vec4<T> f1(c04,c04,c06,c07);
-			Vec4<T> f2(c08,c08,c10,c11);
-			Vec4<T> f3(c12,c12,c14,c15);
-			Vec4<T> f4(c16,c16,c18,c19);
-			Vec4<T> f5(c20,c20,c22,c23);
-			Vec4<T> v0(m[0][1],m[0][0],m[0][0],m[0][0]);
-			Vec4<T> v1(m[1][1],m[1][0],m[1][0],m[1][0]);
-			Vec4<T> v2(m[2][1],m[2][0],m[2][0],m[2][0]);
-			Vec4<T> v3(m[3][1],m[3][0],m[3][0],m[3][0]);
-			Vec4<T> i0(v1*f0-v2*f1+v3*f2);
-			Vec4<T> i1(v0*f0-v2*f3+v3*f4);
-			Vec4<T> i2(v0*f1-v1*f3+v3*f5);
-			Vec4<T> i3(v0*f2-v1*f4+v2*f5);
-			Vec4<T> sA(1,-1,1,-1);
-			Vec4<T> sB(-1,1,-1,1);
-			Mat4<T> inv(i0*sA,i1*sB,i2*sA,i3*sB);
-			Vec4<T> r0(inv.m[0][0],inv.m[0][1],inv.m[0][2],inv.m[0][3]);
-			Vec4<T> d0(m[0][0]*r0.x,m[1][0]*r0.y,m[2][0]*r0.z,m[3][0]*r0.w);
-			T d1=(d0.x+d0.y)+(d0.z+d0.w);
-			T invdet= static_cast<T>(1)/d1;
-			return(inv*invdet);
-			}
-
-		inline void const print(int nl=1) const
-			{
-			printf("| %9.4f %9.4f %9.4f %9.4f |\n",m[0][0],m[0][1],m[0][2],m[0][3]);
-			printf("| %9.4f %9.4f %9.4f %9.4f |\n",m[1][0],m[1][1],m[1][2],m[1][3]);
-			printf("| %9.4f %9.4f %9.4f %9.4f |\n",m[2][0],m[2][1],m[2][2],m[2][3]);
-			printf("| %9.4f %9.4f %9.4f %9.4f |\n",m[3][0],m[3][1],m[3][2],m[3][3]);
-			if (nl) { printf("\n"); }
-			}
-
-	friend Mat4<T> operator+ (const Mat4<T> &L, const Mat4<T> &R)
-		{
-		Mat4<T> c;
-		c.m[0][0]=L.m[0][0]+R.m[0][0]; c.m[1][0]=L.m[1][0]+R.m[1][0]; c.m[2][0]=L.m[2][0]+R.m[2][0]; c.m[3][0]=L.m[3][0]+R.m[3][0];
-		c.m[0][1]=L.m[0][1]+R.m[0][1]; c.m[1][1]=L.m[1][1]+R.m[1][1]; c.m[2][1]=L.m[2][1]+R.m[2][1]; c.m[3][1]=L.m[3][1]+R.m[3][1];
-		c.m[0][2]=L.m[0][2]+R.m[0][2]; c.m[1][2]=L.m[1][2]+R.m[1][2]; c.m[2][2]=L.m[2][2]+R.m[2][2]; c.m[3][2]=L.m[3][2]+R.m[3][2];
-		c.m[0][3]=L.m[0][3]+R.m[0][3]; c.m[1][3]=L.m[1][3]+R.m[1][3]; c.m[2][3]=L.m[2][3]+R.m[2][3]; c.m[3][3]=L.m[3][3]+R.m[3][3];
-		return(c);
-		}
-
-	friend Mat4<T> operator- (const Mat4<T> &R)
-		{
-		Mat4<T> c;
-		c.x0=-R.x0; c.y0=-R.y0; c.z0=-R.z0; c.w0=-R.w0;
-		c.x1=-R.x1; c.y1=-R.y1; c.z1=-R.z1; c.w1=-R.w1;
-		c.x2=-R.x2; c.y2=-R.y2; c.z2=-R.z2; c.w2=-R.w2;
-		c.x3=-R.x3; c.y3=-R.y3; c.z3=-R.z3; c.w3=-R.w3;
-		return(c);
-		}
-
-	friend Mat4<T> operator- (const Mat4<T> &L, const Mat4<T> &R)
-		{
-		Mat4<T> c;
-		c.m[0][0]=L.m[0][0]-R.m[0][0]; c.m[1][0]=L.m[1][0]-R.m[1][0]; c.m[2][0]=L.m[2][0]-R.m[2][0]; c.m[3][0]=L.m[3][0]-R.m[3][0];
-		c.m[0][1]=L.m[0][1]-R.m[0][1]; c.m[1][1]=L.m[1][1]-R.m[1][1]; c.m[2][1]=L.m[2][1]-R.m[2][1]; c.m[3][1]=L.m[3][1]-R.m[3][1];
-		c.m[0][2]=L.m[0][2]-R.m[0][2]; c.m[1][2]=L.m[1][2]-R.m[1][2]; c.m[2][2]=L.m[2][2]-R.m[2][2]; c.m[3][2]=L.m[3][2]-R.m[3][2];
-		c.m[0][3]=L.m[0][3]-R.m[0][3]; c.m[1][3]=L.m[1][3]-R.m[1][3]; c.m[2][3]=L.m[2][3]-R.m[2][3]; c.m[3][3]=L.m[3][3]-R.m[3][3];
-		return(c);
-		}
-
-	friend Vec4<T> operator* (const Mat4<T> &L, const Vec4<T> &R)
-		{
-		Vec4<T> c;
-		c.x=R.x*L.x0+R.y*L.x1+R.z*L.x2+R.w*L.x3;
-		c.y=R.x*L.y0+R.y*L.y1+R.z*L.y2+R.w*L.y3;
-		c.z=R.x*L.z0+R.y*L.z1+R.z*L.z2+R.w*L.z3;
-		c.w=R.x*L.w0+R.y*L.w1+R.z*L.w2+R.w*L.w3;
-		return(c);
-		}
-
-	friend Vec4<T> operator* (const Vec4<T> &L, const Mat4<T> &R)
-		{
-		Vec4<T> c;
-		c.x=L.x*R.x0+L.y*R.y0+L.z*R.z0+L.w*R.w0;
-		c.y=L.x*R.x1+L.y*R.y1+L.z*R.z1+L.w*R.w1;
-		c.z=L.x*R.x2+L.y*R.y2+L.z*R.z2+L.w*R.w2;
-		c.w=L.x*R.x3+L.y*R.y3+L.z*R.z3+L.w*R.w3;
-		return(c);
-		}
-
-	friend Mat4<T> operator* (const Mat4<T> &L, const T &R)
-		{
-		Mat4<T> c;
-		c.m[0][0]=L.m[0][0]*R; c.m[1][0]=L.m[1][0]*R; c.m[2][0]=L.m[2][0]*R; c.m[3][0]=L.m[3][0]*R;
-		c.m[0][1]=L.m[0][1]*R; c.m[1][1]=L.m[1][1]*R; c.m[2][1]=L.m[2][1]*R; c.m[3][1]=L.m[3][1]*R;
-		c.m[0][2]=L.m[0][2]*R; c.m[1][2]=L.m[1][2]*R; c.m[2][2]=L.m[2][2]*R; c.m[3][2]=L.m[3][2]*R;
-		c.m[0][3]=L.m[0][3]*R; c.m[1][3]=L.m[1][3]*R; c.m[2][3]=L.m[2][3]*R; c.m[3][3]=L.m[3][3]*R;
-		return(c);
-		}
-
-	friend Mat4<T> operator* (const T &L, const Mat4<T> &R)
-		{
-		return(R*L);
-		}
-
-	friend Mat4<T> operator* (const Mat4<T> &L, const Mat4<T> &R)
-		{
-		Mat4<T> c;
-		int i,j;
-		for (j=0;j<4;j++)
-			{
-			for (i=0;i<4;i++)
-				{
-				c.m[i][j]=R.m[0][j]*L.m[i][0]+R.m[1][j]*L.m[i][1]+R.m[2][j]*L.m[i][2]+R.m[3][j]*L.m[i][3];
-				}
-			}
-		return(c);
-		}
-
-	friend Mat4<T> operator/ (const Mat4<T> &L, const T &R)
-		{
-		Mat4<T> c;
-		c.m[0][0]=L.m[0][0]/R; c.m[1][0]=L.m[1][0]/R; c.m[2][0]=L.m[2][0]/R; c.m[3][0]=L.m[3][0]/R;
-		c.m[0][1]=L.m[0][1]/R; c.m[1][1]=L.m[1][1]/R; c.m[2][1]=L.m[2][1]/R; c.m[3][1]=L.m[3][1]/R;
-		c.m[0][2]=L.m[0][2]/R; c.m[1][2]=L.m[1][2]/R; c.m[2][2]=L.m[2][2]/R; c.m[3][2]=L.m[3][2]/R;
-		c.m[0][3]=L.m[0][3]/R; c.m[1][3]=L.m[1][3]/R; c.m[2][3]=L.m[2][3]/R; c.m[3][3]=L.m[3][3]/R;
-		return(c);
-		}
-
-	friend Mat4<T> operator/ (const Mat4<T> &L, const Mat4<T> &R)
-		{
-		return(L*R.inverse());
-		}
-
-	friend Mat4<T>& operator+= (Mat4<T> &L, const Mat4<T> &R)
-		{
-		L=L+R;
-		return(L);
-		}
-
-	friend Mat4<T>& operator-= (Mat4<T> &L, const Mat4<T> &R)
-		{
-		L=L-R;
-		return(L);
-		}
-
-	friend Mat4<T>& operator*= (Mat4<T> &L, const Mat4<T> &R)
-		{
-		L=L*R;
-		return(L);
-		}
-
-	friend Mat4<T>& operator*= (Mat4<T> &L, const T &R)
-		{
-		L=L*R;
-		return(L);
-		}
-
-	friend Mat4<T>& operator/= (Mat4<T> &L, const Mat4<T> &R)
-		{
-		L=L/R;
-		return(L);
-		}
-
-	friend Mat4<T>& operator/= (Mat4<T> &L, const T &R)
-		{
-		L=L/R;
-		return(L);
-		}
-
-#ifdef EPSILONCOMP
-
-#define eq(a,b) (fabs(a-b)<EPSILONCOMP)
-#define ne(a,b) (fabs(a-b)>=EPSILONCOMP)
-
-	friend bool operator== (const Mat4<T> &L, const Mat4<T> &R)
-		{
-		return((eq(L.M[0],R.M[0]))&&(eq(L.M[1],R.M[1]))
-			&&(eq(L.M[2],R.M[2]))&&(eq(L.M[3],R.M[3]))
-			&&(eq(L.M[4],R.M[4]))&&(eq(L.M[5],R.M[5]))
-			&&(eq(L.M[6],R.M[6]))&&(eq(L.M[7],R.M[7]))
-			&&(eq(L.M[8],R.M[8]))&&(eq(L.M[9],R.M[9]))
-			&&(eq(L.M[10],R.M[10]))&&(eq(L.M[11],R.M[11]))
-			&&(eq(L.M[12],R.M[12]))&&(eq(L.M[13],R.M[13]))
-			&&(eq(L.M[14],R.M[14]))&&(eq(L.M[15],R.M[15])));
-		}
-
-	friend bool operator!= (const Mat4<T> &L, const Mat4<T> &R)
-		{
-		return((ne(L.M[0],R.M[0]))||(ne(L.M[1],R.M[1]))
-			||(ne(L.M[2],R.M[2]))||(ne(L.M[3],R.M[3]))
-			||(ne(L.M[4],R.M[4]))||(ne(L.M[5],R.M[5]))
-			||(ne(L.M[6],R.M[6]))||(ne(L.M[7],R.M[7]))
-			||(ne(L.M[8],R.M[8]))||(ne(L.M[9],R.M[9]))
-			||(ne(L.M[10],R.M[10]))||(ne(L.M[11],R.M[11]))
-			||(ne(L.M[12],R.M[12]))||(ne(L.M[13],R.M[13]))
-			||(ne(L.M[14],R.M[14]))||(ne(L.M[15],R.M[15])));
-		}
-
-#undef eq
-#undef ne
-
+#if __cplusplus >= 201402L
+#define CONSTEXPR constexpr
 #else
-
-	friend bool operator== (const Mat4<T> &L, const Mat4<T> &R)
-		{
-		return((L.M[0]==R.M[0])&&(L.M[1]==R.M[1])&&(L.M[2]==R.M[2])
-			&&(L.M[3]==R.M[3])&&(L.M[4]==R.M[4])&&(L.M[5]==R.M[5])
-			&&(L.M[6]==R.M[6])&&(L.M[7]==R.M[7])&&(L.M[8]==R.M[8])
-			&&(L.M[9]==R.M[9])&&(L.M[10]==R.M[10])&&(L.M[11]==R.M[11])
-			&&(L.M[12]==R.M[12])&&(L.M[13]==R.M[13])&&(L.M[14]==R.M[14])
-			&&(L.M[15]==R.M[15]));
-		}
-
-	friend bool operator!= (const Mat4<T> &L, const Mat4<T> &R)
-		{
-		return((L.M[0]!=R.M[0])||(L.M[1]!=R.M[1])||(L.M[2]!=R.M[2])
-			||(L.M[3]!=R.M[3])||(L.M[4]!=R.M[4])||(L.M[5]!=R.M[5])
-			||(L.M[6]!=R.M[6])||(L.M[7]!=R.M[7])||(L.M[8]!=R.M[8])
-			||(L.M[9]!=R.M[9])||(L.M[10]!=R.M[10])||(L.M[11]!=R.M[11])
-			||(L.M[12]!=R.M[12])||(L.M[13]!=R.M[13])||(L.M[14]!=R.M[14])
-			||(L.M[15]!=R.M[15]));
-		}
-
+#define CONSTEXPR
 #endif
 
-#define FORM std::setprecision(4) << std::setw(9)
+namespace android {
+// -------------------------------------------------------------------------------------
+namespace details {
 
-	friend std::ostream& operator<< (std::ostream &os, const Mat4<T> &R)
-		{
-		std::ios_base::fmtflags f = os.flags();
-		os << std::fixed;
-		os << std::endl;
-		os << "| " << FORM << R.x0 << " " << FORM << R.x1 << " " << FORM << R.x2 << " " << FORM << R.x3 << " |" << std::endl;
-		os << "| " << FORM << R.y0 << " " << FORM << R.y1 << " " << FORM << R.y2 << " " << FORM << R.y3 << " |" << std::endl;
-		os << "| " << FORM << R.z0 << " " << FORM << R.z1 << " " << FORM << R.z2 << " " << FORM << R.z3 << " |" << std::endl;
-		os << "| " << FORM << R.w0 << " " << FORM << R.w1 << " " << FORM << R.w2 << " " << FORM << R.w3 << " |" << std::endl;
-		os.flags(f);
-		return(os);
-		}
-	};
+template<typename T>
+class TQuaternion;
 
-typedef Mat4<float> mat4;
+/**
+ * A 4x4 column-major matrix class.
+ *
+ * Conceptually a 4x4 matrix is a an array of 4 column double4:
+ *
+ * mat4 m =
+ *      \f$
+ *      \left(
+ *      \begin{array}{cccc}
+ *      m[0] & m[1] & m[2] & m[3] \\
+ *      \end{array}
+ *      \right)
+ *      \f$
+ *      =
+ *      \f$
+ *      \left(
+ *      \begin{array}{cccc}
+ *      m[0][0] & m[1][0] & m[2][0] & m[3][0] \\
+ *      m[0][1] & m[1][1] & m[2][1] & m[3][1] \\
+ *      m[0][2] & m[1][2] & m[2][2] & m[3][2] \\
+ *      m[0][3] & m[1][3] & m[2][3] & m[3][3] \\
+ *      \end{array}
+ *      \right)
+ *      \f$
+ *      =
+ *      \f$
+ *      \left(
+ *      \begin{array}{cccc}
+ *      m(0,0) & m(0,1) & m(0,2) & m(0,3) \\
+ *      m(1,0) & m(1,1) & m(1,2) & m(1,3) \\
+ *      m(2,0) & m(2,1) & m(2,2) & m(2,3) \\
+ *      m(3,0) & m(3,1) & m(3,2) & m(3,3) \\
+ *      \end{array}
+ *      \right)
+ *      \f$
+ *
+ * m[n] is the \f$ n^{th} \f$ column of the matrix and is a double4.
+ *
+ */
+template <typename T>
+class TMat44 :  public TVecUnaryOperators<TMat44, T>,
+                public TVecComparisonOperators<TMat44, T>,
+                public TVecAddOperators<TMat44, T>,
+                public TMatProductOperators<TMat44, T>,
+                public TMatSquareFunctions<TMat44, T>,
+                public TMatTransform<TMat44, T>,
+                public TMatHelpers<TMat44, T>,
+                public TMatDebug<TMat44, T> {
+public:
+    enum no_init { NO_INIT };
+    typedef T value_type;
+    typedef T& reference;
+    typedef T const& const_reference;
+    typedef size_t size_type;
+    typedef TVec4<T> col_type;
+    typedef TVec4<T> row_type;
+
+    static constexpr size_t COL_SIZE = col_type::SIZE;  // size of a column (i.e.: number of rows)
+    static constexpr size_t ROW_SIZE = row_type::SIZE;  // size of a row (i.e.: number of columns)
+    static constexpr size_t NUM_ROWS = COL_SIZE;
+    static constexpr size_t NUM_COLS = ROW_SIZE;
+
+private:
+    /*
+     *  <--  N columns  -->
+     *
+     *  a[0][0] a[1][0] a[2][0] ... a[N][0]    ^
+     *  a[0][1] a[1][1] a[2][1] ... a[N][1]    |
+     *  a[0][2] a[1][2] a[2][2] ... a[N][2]  M rows
+     *  ...                                    |
+     *  a[0][M] a[1][M] a[2][M] ... a[N][M]    v
+     *
+     *  COL_SIZE = M
+     *  ROW_SIZE = N
+     *  m[0] = [ a[0][0] a[0][1] a[0][2] ... a[0][M] ]
+     */
+
+    col_type m_value[NUM_COLS];
+
+public:
+    // array access
+    inline constexpr col_type const& operator[](size_t column) const {
+#if __cplusplus >= 201402L
+        // only possible in C++0x14 with constexpr
+        assert(column < NUM_COLS);
+#endif
+        return m_value[column];
+    }
+
+    inline col_type& operator[](size_t column) {
+        assert(column < NUM_COLS);
+        return m_value[column];
+    }
+
+    // -----------------------------------------------------------------------
+    // we want the compiler generated versions for these...
+    TMat44(const TMat44&) = default;
+    ~TMat44() = default;
+    TMat44& operator = (const TMat44&) = default;
+
+    /*
+     *  constructors
+     */
+
+    // leaves object uninitialized. use with caution.
+    explicit constexpr TMat44(no_init)
+            : m_value{ col_type(col_type::NO_INIT),
+                       col_type(col_type::NO_INIT),
+                       col_type(col_type::NO_INIT),
+                       col_type(col_type::NO_INIT) } {}
+
+    /** initialize to identity.
+     *
+     *      \f$
+     *      \left(
+     *      \begin{array}{cccc}
+     *      1 & 0 & 0 & 0 \\
+     *      0 & 1 & 0 & 0 \\
+     *      0 & 0 & 1 & 0 \\
+     *      0 & 0 & 0 & 1 \\
+     *      \end{array}
+     *      \right)
+     *      \f$
+     */
+    CONSTEXPR TMat44();
+
+    /** initialize to Identity*scalar.
+     *
+     *      \f$
+     *      \left(
+     *      \begin{array}{cccc}
+     *      v & 0 & 0 & 0 \\
+     *      0 & v & 0 & 0 \\
+     *      0 & 0 & v & 0 \\
+     *      0 & 0 & 0 & v \\
+     *      \end{array}
+     *      \right)
+     *      \f$
+     */
+    template<typename U>
+    explicit CONSTEXPR TMat44(U v);
+
+    /** sets the diagonal to a vector.
+     *
+     *      \f$
+     *      \left(
+     *      \begin{array}{cccc}
+     *      v[0] & 0 & 0 & 0 \\
+     *      0 & v[1] & 0 & 0 \\
+     *      0 & 0 & v[2] & 0 \\
+     *      0 & 0 & 0 & v[3] \\
+     *      \end{array}
+     *      \right)
+     *      \f$
+     */
+    template <typename U>
+    explicit CONSTEXPR TMat44(const TVec4<U>& v);
+
+    // construct from another matrix of the same size
+    template <typename U>
+    explicit CONSTEXPR TMat44(const TMat44<U>& rhs);
+
+    /** construct from 4 column vectors.
+     *
+     *      \f$
+     *      \left(
+     *      \begin{array}{cccc}
+     *      v0 & v1 & v2 & v3 \\
+     *      \end{array}
+     *      \right)
+     *      \f$
+     */
+    template <typename A, typename B, typename C, typename D>
+    CONSTEXPR TMat44(const TVec4<A>& v0, const TVec4<B>& v1, const TVec4<C>& v2, const TVec4<D>& v3);
+
+    /** construct from 16 elements in column-major form.
+     *
+     *      \f$
+     *      \left(
+     *      \begin{array}{cccc}
+     *      m[0][0] & m[1][0] & m[2][0] & m[3][0] \\
+     *      m[0][1] & m[1][1] & m[2][1] & m[3][1] \\
+     *      m[0][2] & m[1][2] & m[2][2] & m[3][2] \\
+     *      m[0][3] & m[1][3] & m[2][3] & m[3][3] \\
+     *      \end{array}
+     *      \right)
+     *      \f$
+     */
+    template <
+        typename A, typename B, typename C, typename D,
+        typename E, typename F, typename G, typename H,
+        typename I, typename J, typename K, typename L,
+        typename M, typename N, typename O, typename P>
+    CONSTEXPR TMat44(
+            A m00, B m01, C m02, D m03,
+            E m10, F m11, G m12, H m13,
+            I m20, J m21, K m22, L m23,
+            M m30, N m31, O m32, P m33);
+
+    /**
+     * construct from a quaternion
+     */
+    template <typename U>
+    explicit CONSTEXPR TMat44(const TQuaternion<U>& q);
+
+    /**
+     * construct from a C array in column major form.
+     */
+    template <typename U>
+    explicit CONSTEXPR TMat44(U const* rawArray);
+
+    /**
+     * construct from a 3x3 matrix
+     */
+    template <typename U>
+    explicit CONSTEXPR TMat44(const TMat33<U>& matrix);
+
+    /**
+     * construct from a 3x3 matrix and 3d translation
+     */
+    template <typename U, typename V>
+    CONSTEXPR TMat44(const TMat33<U>& matrix, const TVec3<V>& translation);
+
+    /**
+     * construct from a 3x3 matrix and 4d last column.
+     */
+    template <typename U, typename V>
+    CONSTEXPR TMat44(const TMat33<U>& matrix, const TVec4<V>& column3);
+
+    /*
+     *  helpers
+     */
+
+    static CONSTEXPR TMat44 ortho(T left, T right, T bottom, T top, T near, T far);
+
+    static CONSTEXPR TMat44 frustum(T left, T right, T bottom, T top, T near, T far);
+
+    enum class Fov {
+        HORIZONTAL,
+        VERTICAL
+    };
+    static CONSTEXPR TMat44 perspective(T fov, T aspect, T near, T far, Fov direction = Fov::VERTICAL);
+
+    template <typename A, typename B, typename C>
+    static CONSTEXPR TMat44 lookAt(const TVec3<A>& eye, const TVec3<B>& center, const TVec3<C>& up);
+
+    template <typename A>
+    static CONSTEXPR TVec3<A> project(const TMat44& projectionMatrix, TVec3<A> vertice) {
+        TVec4<A> r = projectionMatrix * TVec4<A>{ vertice, 1 };
+        return r.xyz / r.w;
+    }
+
+    template <typename A>
+    static CONSTEXPR TVec4<A> project(const TMat44& projectionMatrix, TVec4<A> vertice) {
+        vertice = projectionMatrix * vertice;
+        return { vertice.xyz / vertice.w, 1 };
+    }
+
+    /**
+     * Constructs a 3x3 matrix from the upper-left corner of this 4x4 matrix
+     */
+    inline constexpr TMat33<T> upperLeft() const {
+        return TMat33<T>(m_value[0].xyz, m_value[1].xyz, m_value[2].xyz);
+    }
+};
+
+// ----------------------------------------------------------------------------------------
+// Constructors
+// ----------------------------------------------------------------------------------------
+
+// Since the matrix code could become pretty big quickly, we don't inline most
+// operations.
+
+template <typename T>
+CONSTEXPR TMat44<T>::TMat44() {
+    m_value[0] = col_type(1, 0, 0, 0);
+    m_value[1] = col_type(0, 1, 0, 0);
+    m_value[2] = col_type(0, 0, 1, 0);
+    m_value[3] = col_type(0, 0, 0, 1);
+}
+
+template <typename T>
+template <typename U>
+CONSTEXPR TMat44<T>::TMat44(U v) {
+    m_value[0] = col_type(v, 0, 0, 0);
+    m_value[1] = col_type(0, v, 0, 0);
+    m_value[2] = col_type(0, 0, v, 0);
+    m_value[3] = col_type(0, 0, 0, v);
+}
+
+template<typename T>
+template<typename U>
+CONSTEXPR TMat44<T>::TMat44(const TVec4<U>& v) {
+    m_value[0] = col_type(v.x, 0, 0, 0);
+    m_value[1] = col_type(0, v.y, 0, 0);
+    m_value[2] = col_type(0, 0, v.z, 0);
+    m_value[3] = col_type(0, 0, 0, v.w);
+}
+
+// construct from 16 scalars
+template<typename T>
+template <
+    typename A, typename B, typename C, typename D,
+    typename E, typename F, typename G, typename H,
+    typename I, typename J, typename K, typename L,
+    typename M, typename N, typename O, typename P>
+CONSTEXPR TMat44<T>::TMat44(
+        A m00, B m01, C m02, D m03,
+        E m10, F m11, G m12, H m13,
+        I m20, J m21, K m22, L m23,
+        M m30, N m31, O m32, P m33) {
+    m_value[0] = col_type(m00, m01, m02, m03);
+    m_value[1] = col_type(m10, m11, m12, m13);
+    m_value[2] = col_type(m20, m21, m22, m23);
+    m_value[3] = col_type(m30, m31, m32, m33);
+}
+
+template <typename T>
+template <typename U>
+CONSTEXPR TMat44<T>::TMat44(const TMat44<U>& rhs) {
+    for (size_t col = 0; col < NUM_COLS; ++col) {
+        m_value[col] = col_type(rhs[col]);
+    }
+}
+
+// Construct from 4 column vectors.
+template <typename T>
+template <typename A, typename B, typename C, typename D>
+CONSTEXPR TMat44<T>::TMat44(
+        const TVec4<A>& v0, const TVec4<B>& v1,
+        const TVec4<C>& v2, const TVec4<D>& v3) {
+    m_value[0] = col_type(v0);
+    m_value[1] = col_type(v1);
+    m_value[2] = col_type(v2);
+    m_value[3] = col_type(v3);
+}
+
+// Construct from raw array, in column-major form.
+template <typename T>
+template <typename U>
+CONSTEXPR TMat44<T>::TMat44(U const* rawArray) {
+    for (size_t col = 0; col < NUM_COLS; ++col) {
+        for (size_t row = 0; row < NUM_ROWS; ++row) {
+            m_value[col][row] = *rawArray++;
+        }
+    }
+}
+
+template <typename T>
+template <typename U>
+CONSTEXPR TMat44<T>::TMat44(const TQuaternion<U>& q) {
+    const U n = q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w;
+    const U s = n > 0 ? 2/n : 0;
+    const U x = s*q.x;
+    const U y = s*q.y;
+    const U z = s*q.z;
+    const U xx = x*q.x;
+    const U xy = x*q.y;
+    const U xz = x*q.z;
+    const U xw = x*q.w;
+    const U yy = y*q.y;
+    const U yz = y*q.z;
+    const U yw = y*q.w;
+    const U zz = z*q.z;
+    const U zw = z*q.w;
+    m_value[0] = col_type(1-yy-zz,    xy+zw,    xz-yw,   0);
+    m_value[1] = col_type(  xy-zw,  1-xx-zz,    yz+xw,   0);  // NOLINT
+    m_value[2] = col_type(  xz+yw,    yz-xw,  1-xx-yy,   0);  // NOLINT
+    m_value[3] = col_type(      0,        0,        0,   1);  // NOLINT
+}
+
+template <typename T>
+template <typename U>
+CONSTEXPR TMat44<T>::TMat44(const TMat33<U>& m) {
+    m_value[0] = col_type(m[0][0], m[0][1], m[0][2], 0);
+    m_value[1] = col_type(m[1][0], m[1][1], m[1][2], 0);
+    m_value[2] = col_type(m[2][0], m[2][1], m[2][2], 0);
+    m_value[3] = col_type(      0,       0,       0, 1);  // NOLINT
+}
+
+template <typename T>
+template <typename U, typename V>
+CONSTEXPR TMat44<T>::TMat44(const TMat33<U>& m, const TVec3<V>& v) {
+    m_value[0] = col_type(m[0][0], m[0][1], m[0][2], 0);
+    m_value[1] = col_type(m[1][0], m[1][1], m[1][2], 0);
+    m_value[2] = col_type(m[2][0], m[2][1], m[2][2], 0);
+    m_value[3] = col_type(   v[0],    v[1],    v[2], 1);  // NOLINT
+}
+
+template <typename T>
+template <typename U, typename V>
+CONSTEXPR TMat44<T>::TMat44(const TMat33<U>& m, const TVec4<V>& v) {
+    m_value[0] = col_type(m[0][0], m[0][1], m[0][2],    0);  // NOLINT
+    m_value[1] = col_type(m[1][0], m[1][1], m[1][2],    0);  // NOLINT
+    m_value[2] = col_type(m[2][0], m[2][1], m[2][2],    0);  // NOLINT
+    m_value[3] = col_type(   v[0],    v[1],    v[2], v[3]);  // NOLINT
+}
+
+// ----------------------------------------------------------------------------------------
+// Helpers
+// ----------------------------------------------------------------------------------------
+
+template <typename T>
+CONSTEXPR TMat44<T> TMat44<T>::ortho(T left, T right, T bottom, T top, T near, T far) {
+    TMat44<T> m;
+    m[0][0] =  2 / (right - left);
+    m[1][1] =  2 / (top   - bottom);
+    m[2][2] = -2 / (far   - near);
+    m[3][0] = -(right + left)   / (right - left);
+    m[3][1] = -(top   + bottom) / (top   - bottom);
+    m[3][2] = -(far   + near)   / (far   - near);
+    return m;
+}
+
+template <typename T>
+CONSTEXPR TMat44<T> TMat44<T>::frustum(T left, T right, T bottom, T top, T near, T far) {
+    TMat44<T> m;
+    m[0][0] =  (2 * near) / (right - left);
+    m[1][1] =  (2 * near) / (top   - bottom);
+    m[2][0] =  (right + left)   / (right - left);
+    m[2][1] =  (top   + bottom) / (top   - bottom);
+    m[2][2] = -(far   + near)   / (far   - near);
+    m[2][3] = -1;
+    m[3][2] = -(2 * far * near) / (far   - near);
+    m[3][3] =  0;
+    return m;
+}
+
+template <typename T>
+CONSTEXPR TMat44<T> TMat44<T>::perspective(T fov, T aspect, T near, T far, TMat44::Fov direction) {
+    T h;
+    T w;
+
+    if (direction == TMat44::Fov::VERTICAL) {
+        h = std::tan(fov * M_PI / 360.0f) * near;
+        w = h * aspect;
+    } else {
+        w = std::tan(fov * M_PI / 360.0f) * near;
+        h = w / aspect;
+    }
+    return frustum(-w, w, -h, h, near, far);
+}
+
+/*
+ * Returns a matrix representing the pose of a virtual camera looking towards -Z in its
+ * local Y-up coordinate system. "eye" is where the camera is located, "center" is the points its
+ * looking at and "up" defines where the Y axis of the camera's local coordinate system is.
+ */
+template <typename T>
+template <typename A, typename B, typename C>
+CONSTEXPR TMat44<T> TMat44<T>::lookAt(const TVec3<A>& eye, const TVec3<B>& center, const TVec3<C>& up) {
+    TVec3<T> z_axis(normalize(center - eye));
+    TVec3<T> norm_up(normalize(up));
+    if (std::abs(dot(z_axis, norm_up)) > 0.999) {
+        // Fix up vector if we're degenerate (looking straight up, basically)
+        norm_up = { norm_up.z, norm_up.x, norm_up.y };
+    }
+    TVec3<T> x_axis(normalize(cross(z_axis, norm_up)));
+    TVec3<T> y_axis(cross(x_axis, z_axis));
+    return TMat44<T>(
+            TVec4<T>(x_axis, 0),
+            TVec4<T>(y_axis, 0),
+            TVec4<T>(-z_axis, 0),
+            TVec4<T>(eye, 1));
+}
+
+// ----------------------------------------------------------------------------------------
+// Arithmetic operators outside of class
+// ----------------------------------------------------------------------------------------
+
+/* We use non-friend functions here to prevent the compiler from using
+ * implicit conversions, for instance of a scalar to a vector. The result would
+ * not be what the caller expects.
+ *
+ * Also note that the order of the arguments in the inner loop is important since
+ * it determines the output type (only relevant when T != U).
+ */
+
+// matrix * column-vector, result is a vector of the same type than the input vector
+template <typename T, typename U>
+CONSTEXPR typename TMat44<T>::col_type PURE operator *(const TMat44<T>& lhs, const TVec4<U>& rhs) {
+    // Result is initialized to zero.
+    typename TMat44<T>::col_type result;
+    for (size_t col = 0; col < TMat44<T>::NUM_COLS; ++col) {
+        result += lhs[col] * rhs[col];
+    }
+    return result;
+}
+
+// mat44 * vec3, result is vec3( mat44 * {vec3, 1} )
+template <typename T, typename U>
+CONSTEXPR typename TMat44<T>::col_type PURE operator *(const TMat44<T>& lhs, const TVec3<U>& rhs) {
+    return lhs * TVec4<U>{ rhs, 1 };
+}
+
+
+// row-vector * matrix, result is a vector of the same type than the input vector
+template <typename T, typename U>
+CONSTEXPR typename TMat44<U>::row_type PURE operator *(const TVec4<U>& lhs, const TMat44<T>& rhs) {
+    typename TMat44<U>::row_type result(TMat44<U>::row_type::NO_INIT);
+    for (size_t col = 0; col < TMat44<T>::NUM_COLS; ++col) {
+        result[col] = dot(lhs, rhs[col]);
+    }
+    return result;
+}
+
+// matrix * scalar, result is a matrix of the same type than the input matrix
+template <typename T, typename U>
+constexpr typename std::enable_if<std::is_arithmetic<U>::value, TMat44<T>>::type PURE
+operator *(TMat44<T> lhs, U rhs) {
+    return lhs *= rhs;
+}
+
+// scalar * matrix, result is a matrix of the same type than the input matrix
+template <typename T, typename U>
+constexpr typename std::enable_if<std::is_arithmetic<U>::value, TMat44<T>>::type PURE
+operator *(U lhs, const TMat44<T>& rhs) {
+    return rhs * lhs;
+}
+
+// ----------------------------------------------------------------------------------------
+
+/* FIXME: this should go into TMatSquareFunctions<> but for some reason
+ * BASE<T>::col_type is not accessible from there (???)
+ */
+template<typename T>
+typename TMat44<T>::col_type PURE diag(const TMat44<T>& m) {
+    return matrix::diag(m);
+}
+
+} // namespace details
+
+// ----------------------------------------------------------------------------------------
+
+typedef details::TMat44<double> mat4d;
+typedef details::TMat44<float> mat4;
+typedef details::TMat44<float> mat4f;
+
+// ----------------------------------------------------------------------------------------
+}  // namespace android
+
+#undef PURE
+#undef CONSTEXPR
 
 #endif
