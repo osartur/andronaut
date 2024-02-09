@@ -28,6 +28,7 @@ void Mesh::Alloc(int vertex_count, int index_count, const unsigned layout[4], un
 	
 	for (int i=0, begin=0; i < 4 && layout[i] != 0; begin+=layout[i]*sizeof(float), i++)
 	{
+		glEnableVertexAttribArray(i);
 		glVertexAttribPointer(i, layout[i], GL_FLOAT, false, vertex_size, (void*) begin);
 	}
 	
