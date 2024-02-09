@@ -1,6 +1,6 @@
-#include "activity.h"
-#include "window.h"
-#include "input.h"
+#include "ANUT/activity.h"
+#include "ANUT/window.h"
+#include "ANUT/input.h"
 #include <GLES3/gl32.h>
 
 Window* Activity::window = nullptr;

@@ -26,10 +26,10 @@
 #include <iomanip>
 #include <stdexcept>
 
-#include <math/quat.h>
-#include <math/TVecHelpers.h>
+#include "ANUT/math/quat.h"
+#include "ANUT/math/TVecHelpers.h"
 
-#include  <utils/String8.h>
+//#include  <utils/String8.h>
 
 #ifndef LIKELY
 #define LIKELY_DEFINED_LOCAL
@@ -340,18 +340,18 @@ TQuaternion<typename MATRIX::value_type> extractQuat(const MATRIX& mat) {
     return quat;
 }
 
-template <typename MATRIX>
+/*template <typename MATRIX>
 String8 asString(const MATRIX& m) {
     String8 s;
     for (size_t c = 0; c < MATRIX::COL_SIZE; c++) {
-        s.append("|  ");
+    	s.append("|  ");
         for (size_t r = 0; r < MATRIX::ROW_SIZE; r++) {
             s.appendFormat("%7.2f  ", m[r][c]);
         }
         s.append("|\n");
     }
     return s;
-}
+}*/
 
 }  // namespace matrix
 
@@ -626,9 +626,10 @@ public:
         return stream;
     }
 
-    String8 asString() const {
-        return matrix::asString(static_cast<const BASE<T>&>(*this));
-    }
+    //String8 asString() const {
+    //    return matrix::asString(static_cast<const BASE<T>&>(*this));
+    //}
+    
 };
 
 // -------------------------------------------------------------------------------------

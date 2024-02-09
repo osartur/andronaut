@@ -17,10 +17,10 @@
 #if not defined(ANUT_QUAT_H)
 #define ANUT_QUAT_H
 
-#include <math/half.h>
-#include <math/TQuatHelpers.h>
-#include <math/vec3.h>
-#include <math/vec4.h>
+#include "ANUT/math/half.h"
+#include "ANUT/math/TQuatHelpers.h"
+#include "ANUT/math/vec3.h"
+#include "ANUT/math/vec4.h"
 
 #include <stdint.h>
 #include <sys/types.h>

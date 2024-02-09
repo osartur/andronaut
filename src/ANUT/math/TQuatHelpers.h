@@ -24,7 +24,7 @@
 
 #include <iostream>
 
-#include <math/vec3.h>
+#include "ANUT/math/vec3.h"
 
 #define PURE __attribute__((pure))
 

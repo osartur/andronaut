@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.14.5)
 project(andronaut)
 
+set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/ANUT")
+
 file(GLOB SRC_FILES
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/graphics/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/math/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/*.cpp"
+    "${SRC_DIR}/*.cpp"
+    "${SRC_DIR}/graphics/*.cpp"
+    "${SRC_DIR}/math/*.cpp"
+    "${SRC_DIR}/utils/*.cpp"
 )
 
 add_library(andronaut OBJECT 

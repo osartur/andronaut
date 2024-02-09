@@ -17,11 +17,11 @@
 #if not defined(ANUT_MAT4_H)
 #define ANUT_MAT4_H
 
-#include <math/mat3.h>
-#include <math/quat.h>
-#include <math/TMatHelpers.h>
-#include <math/vec3.h>
-#include <math/vec4.h>
+#include "ANUT/math/mat3.h"
+#include "ANUT/math/quat.h"
+#include "ANUT/math/TMatHelpers.h"
+#include "ANUT/math/vec3.h"
+#include "ANUT/math/vec4.h"
 
 #include <stdint.h>
 #include <sys/types.h>

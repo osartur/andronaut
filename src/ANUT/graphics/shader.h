@@ -1,5 +1,6 @@
 #if not defined(ANUT_SHADER_H)
 #define ANUT_SHADER_H
+#include <GLES3/gl32.h>
 
 class Shader
 {
@@ -7,20 +8,22 @@ public:
 	Shader();
 	~Shader();
 	
-	bool Init(const char* vert_filename, const char* frag_filename);
-	void Delete();
+	bool Init(unsigned compiled_program);
+	int operator[](const char* uniform_name) const;
 	
 private:
-	bool Compile(const char* filename, unsigned target_shader);
-	
 	unsigned program;
-	unsigned vshader;
-	unsigned fshader;
 	
 	friend void SetCurrentShader(const Shader& target);
 };
 
 void SetCurrentShader(const Shader& target);
 void SetCurrentShader();
+
+
+inline int Shader::operator[](const char* uniform_name) const
+{
+	return glGetUniformLocation(program, uniform_name);
+}
 
 #endif

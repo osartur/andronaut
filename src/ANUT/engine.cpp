@@ -1,11 +1,11 @@
 #include <android/native_activity.h>
 #include <android/window.h>
 #include "android_native_app_glue.h"
-#include "activity.h"
-#include "engine.h"
-#include "input.h"
-#include "math/timer.h"
-#include "window.h"
+#include "ANUT/activity.h"
+#include "ANUT/engine.h"
+#include "ANUT/input.h"
+#include "ANUT/utils/timer.h"
+#include "ANUT/window.h"
 
 Window* Engine::window = nullptr;
 Input*  Engine::input = nullptr;
@@ -69,10 +69,11 @@ int Engine::Start(Activity* main_act)
 	}
 }
 
-void Engine::Abort(int status)
+void Engine::Abort(int status, std::string msg)
 {
 	ANativeActivity_finish(android->activity);
 	exit_code = status;
+	message = msg;
 	state = STOPPED;
 }
 

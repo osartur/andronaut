@@ -20,7 +20,7 @@
 
 #include <math.h>
 #include <stdint.h>
-#include <math/HashCombine.h>
+#include "ANUT/math/HashCombine.h"
 #include <sys/types.h>
 
 #include <cmath>

@@ -1,5 +1,6 @@
 #if not defined(ANUT_ENGINE_H)
 #define ANUT_ENGINE_H
+#include <string>
 
 class android_app;
 class Window;
@@ -17,7 +18,8 @@ public:
 	virtual ~Engine();
 	
 	int Start(Activity* main_act);
-	void Abort(int status);
+	void Abort(int status, std::string msg = std::string());
+	std::string AbortMessage() const;
 	
 private:
 	void ActivityProc(int cmd);
@@ -33,6 +35,13 @@ private:
 	Activity* main_activity;
 	Timer* counter;
 	int exit_code;
+	std::string message;
 };
+
+
+inline std::string Engine::AbortMessage() const
+{
+	return message;
+}
 
 #endif

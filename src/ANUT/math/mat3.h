@@ -17,9 +17,9 @@
 #if not defined(ANUT_MAT3_H)
 #define ANUT_MAT3_H
 
-#include <math/quat.h>
-#include <math/TMatHelpers.h>
-#include <math/vec3.h>
+#include "ANUT/math/quat.h"
+#include "ANUT/math/TMatHelpers.h"
+#include "ANUT/math/vec3.h"
 #include <stdint.h>
 #include <sys/types.h>
 

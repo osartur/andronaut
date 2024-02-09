@@ -1,6 +1,6 @@
 #if not defined(ANUT_ACTIVITY_H)
 #define ANUT_ACTIVITY_H
-#include "engine.h"
+#include "ANUT/engine.h"
 
 class android_app;
 class Window;

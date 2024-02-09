@@ -17,8 +17,8 @@
 #if not defined(ANUT_MAT2_H)
 #define ANUT_MAT2_H
 
-#include <math/TMatHelpers.h>
-#include <math/vec2.h>
+#include "ANUT/math/TMatHelpers.h"
+#include "ANUT/math/vec2.h"
 #include <stdint.h>
 #include <sys/types.h>
 

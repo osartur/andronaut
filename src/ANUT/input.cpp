@@ -1,4 +1,4 @@
-#include "input.h"
+#include "ANUT/input.h"
 #include "android_native_app_glue.h"
 #include <android/input.h>
 
