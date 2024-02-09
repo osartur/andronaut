@@ -40,22 +40,22 @@ bool Window::Init(ANativeWindow* window)
 		EGL_NONE
 	};
 	
-	m_display = EGL_CALL(eglGetDisplay(EGL_DEFAULT_DISPLAY));
-	EGL_CALL(eglInitialize(m_display, nullptr, nullptr));
+	display = EGL_CALL(eglGetDisplay(EGL_DEFAULT_DISPLAY));
+	EGL_CALL(eglInitialize(display, nullptr, nullptr));
 	
 	if (!ChooseConfig(window_attributes))
 	{
 		return false;
 	}
 	
-	m_surface = EGL_CALL(eglCreateWindowSurface(m_display, m_config, window, render_buffer));
-	m_context = EGL_CALL(eglCreateContext(m_display, m_config, EGL_NO_CONTEXT, gles_version));
-	EGL_CALL(eglMakeCurrent(m_display, m_surface, m_surface, m_context));
-	EGL_CALL(eglSwapInterval(m_display, 0));
+	surface = EGL_CALL(eglCreateWindowSurface(display, config, window, render_buffer));
+	context = EGL_CALL(eglCreateContext(display, config, EGL_NO_CONTEXT, gles_version));
+	EGL_CALL(eglMakeCurrent(display, surface, surface, context));
+	EGL_CALL(eglSwapInterval(display, 0));
 	
-	m_width = ANativeWindow_getWidth(window);
-	m_height = ANativeWindow_getHeight(window);
-	m_open = true;
+	width = ANativeWindow_getWidth(window);
+	height = ANativeWindow_getHeight(window);
+	open = true;
 	
 	return true;
 }
@@ -63,28 +63,28 @@ bool Window::Init(ANativeWindow* window)
 bool Window::ChooseConfig(const int attributes[])
 {
 	int configs_count;
-	EGL_CALL(eglChooseConfig(m_display, attributes, nullptr, 0, &configs_count));
+	EGL_CALL(eglChooseConfig(display, attributes, nullptr, 0, &configs_count));
 	std::vector<EGLConfig> matches;
 	matches.resize(configs_count);
-	EGL_CALL(eglChooseConfig(m_display, attributes, matches.data(), configs_count, &configs_count));
+	EGL_CALL(eglChooseConfig(display, attributes, matches.data(), configs_count, &configs_count));
 	
 	for (int i = 0; i < configs_count; i++)
 	{
 		if (MatchConfig(matches[i], attributes))
 		{
-			m_config = matches[i];
+			config = matches[i];
 			return true;
 		}
 	}
 	return false;
 }
 
-bool Window::MatchConfig(EGLConfig config, const int attributes[])
+bool Window::MatchConfig(EGLConfig target, const int attributes[])
 {
 	for (int i = 0; attributes[i] != EGL_NONE; i+=2)
 	{
 		int value;
-		EGL_CALL(eglGetConfigAttrib(m_display, config, attributes[i], &value));
+		EGL_CALL(eglGetConfigAttrib(display, target, attributes[i], &value));
 		if (value != attributes[i+1])
 		{
 			return false;
@@ -97,22 +97,22 @@ void Window::Destroy()
 {
 	// nullptr = EGL_NO_*
 	
-	if (m_display == nullptr)
+	if (display == nullptr)
 	{
 		return;
 	}
 	
-	eglMakeCurrent(m_display, nullptr, nullptr, nullptr);
-	if (m_context != nullptr)
+	eglMakeCurrent(display, nullptr, nullptr, nullptr);
+	if (context != nullptr)
 	{
-		eglDestroyContext(m_display, m_context);
+		eglDestroyContext(display, context);
 	}
-	if (m_surface != nullptr)
+	if (surface != nullptr)
 	{
-		eglDestroySurface(m_display, m_surface);
+		eglDestroySurface(display, surface);
 	}
 	
-	eglTerminate(m_display);
+	eglTerminate(display);
 	
 	memset(this, 0, sizeof(Window));
 }

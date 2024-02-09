@@ -17,36 +17,36 @@ public:
 	
 private:
 	bool ChooseConfig(const int attributes[]);
-	bool MatchConfig(EGLConfig config, const int attributes[]);
+	bool MatchConfig(EGLConfig target, const int attributes[]);
 	
-	EGLDisplay m_display;
-	EGLConfig  m_config;
-	EGLSurface m_surface;
-	EGLContext m_context;
-	int m_width;
-	int m_height;
-	bool m_open;
+	EGLDisplay display;
+	EGLConfig  config;
+	EGLSurface surface;
+	EGLContext context;
+	int width;
+	int height;
+	bool open;
 };
 
 
 inline int Window::Width() const
 {
-	return m_width;
+	return width;
 }
 
 inline int Window::Height() const
 {
-	return m_height;
+	return height;
 }
 
 inline bool Window::IsOpen() const
 {
-	return m_open;
+	return open;
 }
 
 inline void Window::Display()
 {
-	eglSwapBuffers(m_display, m_surface);
+	eglSwapBuffers(display, surface);
 }
 
 #endif
