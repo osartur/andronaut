@@ -55,6 +55,7 @@ bool Window::Init(ANativeWindow* window)
 	
 	width = ANativeWindow_getWidth(window);
 	height = ANativeWindow_getHeight(window);
+	aspect = (float) width / (float) height;
 	open = true;
 	
 	return true;

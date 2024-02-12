@@ -3,7 +3,6 @@
 
 #include "ANUT/graphics/mesh.h"
 #include "ANUT/graphics/shader.h"
-#include "ANUT/graphics/uniform.h"
 #include "ANUT/graphics/glslCompiler.h"
 
 #endif

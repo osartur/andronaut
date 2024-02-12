@@ -12,6 +12,7 @@ public:
 	
 	int Width() const;
 	int Height() const;
+	float AspectRatio() const;
 	bool IsOpen() const;
 	void Display();
 	
@@ -25,6 +26,7 @@ private:
 	EGLContext context;
 	int width;
 	int height;
+	float aspect;
 	bool open;
 };
 
@@ -37,6 +39,11 @@ inline int Window::Width() const
 inline int Window::Height() const
 {
 	return height;
+}
+
+inline float Window::AspectRatio() const
+{
+	return aspect;
 }
 
 inline bool Window::IsOpen() const

@@ -56,6 +56,7 @@ void Mesh::CopyData(const void* data, int vertex_count, const unsigned* index, i
 void Mesh::Draw(unsigned primitive, int count)
 {
 	glBindVertexArray(vao);
+	// it should work without this line, but it doesn't. WHY?!
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glDrawElements(primitive, count, GL_UNSIGNED_INT, (void*) 0);
 	glBindVertexArray(0);
