@@ -1,10 +1,8 @@
 #include "activity.h"
 #include "window.h"
-#include "input.h"
 #include <GLES3/gl32.h>
 
 Window* Activity::window = nullptr;
-Input* Activity::input = nullptr;
 Engine* Activity::engine = nullptr;
 
 void Activity::OnCreate(void* saved_state)
@@ -52,7 +50,7 @@ void Activity::OnSurfaceChanged(int w, int h)
 	glViewport(0, 0, w, h);
 }
 
-void Activity::OnUpdate(float dt)
+void Activity::OnUpdate(const Event& event, float dt)
 {
 	
 }

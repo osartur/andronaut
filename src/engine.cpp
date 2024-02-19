@@ -1,14 +1,14 @@
 #include <android/native_activity.h>
 #include <android/window.h>
+#include <android/input.h>
 #include "android_native_app_glue.h"
 #include "activity.h"
-#include "engine.h"
 #include "input.h"
+#include "engine.h"
 #include "utils/timer.h"
 #include "window.h"
 
 Window* Engine::window = nullptr;
-Input*  Engine::input = nullptr;
 
 Engine::Engine(android_app* app)
 {
@@ -18,7 +18,6 @@ Engine::Engine(android_app* app)
 	
 	android = app;
 	android->userData = (void*) this;
-	android->onInputEvent = Input::InputProc;
 	android->onAppCmd = 
 	[](android_app* app, int cmd)
 	{
@@ -27,11 +26,19 @@ Engine::Engine(android_app* app)
 			anut->ActivityProc(cmd);
 	};
 	
+	android->onInputEvent = 
+	[](android_app* app, AInputEvent* ev) -> int
+	{
+		Engine* anut = (Engine*) app->userData;
+		if (anut)
+			return anut->InputProc(ev);
+		return 0;
+	};
+	
 	exit_code = 0;
 	main_activity = nullptr;
 	
 	Activity::window = window;
-	Activity::input = input;
 	Activity::engine = this;
 }
 
@@ -65,7 +72,8 @@ int Engine::Start(Activity* main_act)
 		}
 		main_activity->OnDrawFrame();
 		window->Display();
-		main_activity->OnUpdate(counter->Restart());
+		main_activity->OnUpdate(input->event, counter->Restart());
+		input->event.type = Event::NONE;
 	}
 }
 
@@ -138,3 +146,13 @@ void Engine::ActivityProc(int cmd)
 	}
 }
 
+int Engine::InputProc(AInputEvent* event)
+{
+	switch (AInputEvent_getType(event))
+	{
+		case AINPUT_EVENT_TYPE_MOTION:
+			input->ProcessTouch(event);
+			return 1;
+	}
+	return 0;
+}

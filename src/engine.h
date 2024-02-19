@@ -3,6 +3,7 @@
 #include <string>
 
 class android_app;
+class AInputEvent;
 class Window;
 class Input;
 class Activity;
@@ -12,7 +13,6 @@ class Engine
 {
 public:
 	static Window* window;
-	static Input* input;
 	
 	Engine(android_app* app);
 	virtual ~Engine();
@@ -23,6 +23,7 @@ public:
 	
 private:
 	void ActivityProc(int cmd);
+	int InputProc(AInputEvent* event);
 	
 	enum
 	{
@@ -33,6 +34,7 @@ private:
 	
 	android_app* android;
 	Activity* main_activity;
+	Input* input;
 	Timer* counter;
 	int exit_code;
 	std::string message;
