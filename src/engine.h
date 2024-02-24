@@ -25,7 +25,7 @@ private:
 	void ActivityProc(int cmd);
 	int InputProc(AInputEvent* event);
 	
-	enum
+	enum : int
 	{
 		STOPPED = -1,
 		RUNNING = 0

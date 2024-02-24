@@ -15,6 +15,7 @@ void Input::ProcessTouch(AInputEvent* ev)
 	
 	switch (action)
 	{
+		case AMOTION_EVENT_ACTION_POINTER_DOWN:
 		case AMOTION_EVENT_ACTION_DOWN:
 			event.type = Event::FINGER_DOWN;
 			break;
@@ -23,6 +24,7 @@ void Input::ProcessTouch(AInputEvent* ev)
 			event.type = Event::FINGER_MOTION;
 			break;
 			
+		case AMOTION_EVENT_ACTION_POINTER_UP:
 		case AMOTION_EVENT_ACTION_UP:
 			event.type = Event::FINGER_UP;
 			break;
