@@ -22,6 +22,8 @@ public:
 	std::string AbortMessage() const;
 	
 private:
+	static void ActivityCall(android_app* android, int cmd);
+	static int InputCall(android_app* android, AInputEvent* event);
 	void ActivityProc(int cmd);
 	int InputProc(AInputEvent* event);
 	

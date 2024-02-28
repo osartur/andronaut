@@ -17,23 +17,9 @@ Engine::Engine(android_app* app)
 	counter = new Timer;
 	
 	android = app;
-	android->userData = (void*) this;
-	android->onAppCmd = 
-	[](android_app* app, int cmd)
-	{
-		Engine* anut = (Engine*) app->userData;
-		if (anut)
-			anut->ActivityProc(cmd);
-	};
-	
-	android->onInputEvent = 
-	[](android_app* app, AInputEvent* ev) -> int
-	{
-		Engine* anut = (Engine*) app->userData;
-		if (anut)
-			return anut->InputProc(ev);
-		return 0;
-	};
+	android->userData = this;
+	android->onAppCmd = ActivityCall;
+	android->onInputEvent = InputCall;
 	
 	exit_code = 0;
 	main_activity = nullptr;
@@ -57,11 +43,11 @@ int Engine::Start(Activity* main_act)
 	
 	while (true)
 	{
-		android_poll_source* source;
-		int ident, fd, event;
-		while ((ident=ALooper_pollOnce(state, &fd, &event, (void**) &source)) >= 0)
+		android_poll_source* source = nullptr;
+		int fd, event;
+		while (ALooper_pollOnce(state, &fd, &event, (void**) &source) >= 0)
 		{
-			if (source)
+			if (source != nullptr)
 			{
 				source->process(android, source);
 			}
@@ -153,6 +139,25 @@ int Engine::InputProc(AInputEvent* event)
 		case AINPUT_EVENT_TYPE_MOTION:
 			input->ProcessTouch(event);
 			return 1;
+	}
+	return 0;
+}
+
+void Engine::ActivityCall(android_app* android, int cmd)
+{
+	Engine* me = (Engine*) android->userData;
+	if (me != nullptr)
+	{
+		me->ActivityProc(cmd);
+	}
+}
+
+int Engine::InputCall(android_app* android, AInputEvent* event)
+{
+	Engine* me = (Engine*) android->userData;
+	if (me != nullptr)
+	{
+		return me->InputProc(event);
 	}
 	return 0;
 }

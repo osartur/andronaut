@@ -13,9 +13,9 @@ struct Event
 	
 	struct Finger
 	{
+		int id;
 		int x;
 		int y;
-		int id;
 	};
 	
 	int type = NONE;
