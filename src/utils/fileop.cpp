@@ -1,7 +1,7 @@
 #include "utils/fileop.h"
 #include <fstream>
 
-std::string ReadFileContent(const char* filename)
+std::string readFileContent(const char* filename)
 {
 	std::ifstream f{filename};
 	if (!f.is_open())

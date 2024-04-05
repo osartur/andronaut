@@ -1,7 +1,7 @@
 #include <android/input.h>
 #include "input.h"
 
-void Input::ProcessTouch(AInputEvent* ev)
+void Input::processTouch(AInputEvent* ev)
 {
 	int flags = AMotionEvent_getAction(ev);
 	int action = flags & AMOTION_EVENT_ACTION_MASK;

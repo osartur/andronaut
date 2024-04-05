@@ -9,6 +9,12 @@ class Input;
 class Activity;
 class Timer;
 
+struct ProgramExit
+{
+	int code;
+	std::string message;
+};
+
 class Engine
 {
 public:
@@ -17,35 +23,27 @@ public:
 	Engine(android_app* app);
 	virtual ~Engine();
 	
-	int Start(Activity* main_act);
-	void Abort(int status, std::string msg = std::string());
-	std::string AbortMessage() const;
+	ProgramExit start(Activity* activity);
+	void finish(int status, std::string msg = std::string());
 	
 private:
-	static void ActivityCall(android_app* android, int cmd);
-	static int InputCall(android_app* android, AInputEvent* event);
-	void ActivityProc(int cmd);
-	int InputProc(AInputEvent* event);
+	static void activityCall(android_app* android, int cmd);
+	static int inputCall(android_app* android, AInputEvent* event);
+	void activityProc(int cmd);
+	int inputProc(AInputEvent* event);
 	
-	enum : int
+	enum State : int
 	{
 		STOPPED = -1,
 		RUNNING = 0
-	}
-	state;
+	};
 	
-	android_app* android;
-	Activity* main_activity;
-	Input* input;
-	Timer* counter;
-	int exit_code;
-	std::string message;
+	android_app* _android;
+	Activity* _activity;
+	Input* _input;
+	Timer* _counter;
+	int _state;
+	ProgramExit _output;
 };
-
-
-inline std::string Engine::AbortMessage() const
-{
-	return message;
-}
 
 #endif

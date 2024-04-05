@@ -6,60 +6,55 @@ using std::chrono::duration;
 
 Timer::Timer()
 {
-	m_paused = false;
-	Start();
+	_paused = false;
+	start();
 }
 
-void Timer::Start()
+void Timer::start()
 {
-	if (m_paused)
+	if (_paused)
 	{
-		auto elapsed = m_end - m_start;
-		m_start = Now() - elapsed;
-		m_paused = false;
+		auto elapsed = _end - _start;
+		_start = now() - elapsed;
+		_paused = false;
 	}
 	else
 	{
-		m_start = Now();
+		_start = now();
 	}
 }
 
-void Timer::Pause()
+void Timer::pause()
 {
-	if (!m_paused)
+	if (!_paused)
 	{
-		m_end = Now();
-		m_paused = true;
+		_end = now();
+		_paused = true;
 	}
 }
 
-float Timer::Restart()
+float Timer::restart()
 {
 	high_resolution_clock::duration elapsed;
-	if (m_paused)
+	if (_paused)
 	{
-		elapsed = m_end - m_start;
-		m_start = Now() - elapsed;
-		m_paused = false;
+		elapsed = _end - _start;
+		_start = now() - elapsed;
+		_paused = false;
 	}
 	else
 	{
-		auto now = Now();
-		elapsed = now - m_start;
-		m_start = now;
+		auto right_now = now();
+		elapsed = right_now - _start;
+		_start = right_now;
 	}
 	return duration_cast<duration<float>>(elapsed).count();
 }
 
-float Timer::Elapsed() const
+float Timer::elapsed() const
 {
-	auto end = m_paused ? m_end : Now();
-	auto elapsed = duration_cast<duration<float>>(end - m_start);
+	auto end = _paused ? _end : now();
+	auto elapsed = duration_cast<duration<float>>(end - _start);
 	return elapsed.count();
 }
 
-bool Timer::Elapsed(float secs) const
-{
-	float elapsed = Elapsed();
-	return abs(elapsed - secs) < 0.000001f || elapsed > secs;
-}

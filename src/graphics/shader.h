@@ -7,20 +7,22 @@
 class Shader
 {
 public:
+	Shader(unsigned shaderId);
 	Shader();
 	~Shader();
 	
-	bool Init(unsigned compiled_program);
-	int operator[](const std::string& uniform_name);
+	int operator[](const std::string& uniformName);
+	void use();
 	
 private:
-	unsigned program;
-	std::unordered_map<std::string, int> uniform_cache;
-	
-	friend void SetCurrentShader(const Shader& target);
+	unsigned _id;
+	std::unordered_map<std::string, int> _uniformCache;
 };
 
-void SetCurrentShader(const Shader& target);
-void SetCurrentShader();
+
+inline void Shader::use()
+{
+	glUseProgram(_id);
+}
 
 #endif

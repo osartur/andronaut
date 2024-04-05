@@ -13,16 +13,16 @@ Window* Engine::window = nullptr;
 Engine::Engine(android_app* app)
 {
 	window = new Window;
-	input = new Input;
-	counter = new Timer;
+	_input = new Input;
+	_counter = new Timer;
 	
-	android = app;
-	android->userData = this;
-	android->onAppCmd = ActivityCall;
-	android->onInputEvent = InputCall;
+	_android = app;
+	_android->userData = this;
+	_android->onAppCmd = activityCall;
+	_android->onInputEvent = inputCall;
 	
-	exit_code = 0;
-	main_activity = nullptr;
+	_output.code = 0;
+	_activity = nullptr;
 	
 	Activity::window = window;
 	Activity::engine = this;
@@ -31,133 +31,131 @@ Engine::Engine(android_app* app)
 Engine::~Engine()
 {
 	delete window;
-	delete input;
-	delete counter;
+	delete _input;
+	delete _counter;
 }
 
-int Engine::Start(Activity* main_act)
+ProgramExit Engine::start(Activity* activity)
 {
-	main_activity = main_act;
-	main_activity->OnCreate(android->savedState);
-	state = STOPPED;
+	_activity = activity;
+	_activity->onCreate(_android->savedState);
+	_state = STOPPED;
 	
 	while (true)
 	{
 		android_poll_source* source = nullptr;
 		int fd, event;
-		while (ALooper_pollOnce(state, &fd, &event, (void**) &source) >= 0)
+		while (ALooper_pollOnce(_state, &fd, &event, (void**) &source) >= 0)
 		{
 			if (source != nullptr)
 			{
-				source->process(android, source);
+				source->process(_android, source);
 			}
-			if (android->destroyRequested != 0)
+			if (_android->destroyRequested != 0)
 			{
-				return exit_code;
+				return _output;
 			}
 		}
-		main_activity->OnDrawFrame();
-		window->Display();
-		main_activity->OnUpdate(input->event, counter->Restart());
-		input->event.type = Event::NONE;
+		_activity->onDrawFrame();
+		window->display();
+		_activity->onUpdate(_input->event, _counter->restart());
+		_input->event.type = Event::NONE;
 	}
 }
 
-void Engine::Abort(int status, std::string msg)
+void Engine::finish(int status, std::string msg)
 {
-	ANativeActivity_finish(android->activity);
-	exit_code = status;
-	message = msg;
-	state = STOPPED;
+	ANativeActivity_finish(_android->activity);
+	_state = STOPPED;
+	_output.code = status;
+	_output.message = msg;
 }
 
-void Engine::ActivityProc(int cmd)
+void Engine::activityProc(int cmd)
 {
 	switch (cmd)
 	{
 		case APP_CMD_START:
-			main_activity->OnStart();
-			return;
+			_activity->onStart();
+			break;
 			
 		case APP_CMD_RESUME:
-			main_activity->OnResume();
+			_activity->onResume();
 			break;
 			
 		case APP_CMD_INIT_WINDOW:
-			if (!window->Init(android->window))
+			if (!window->init(_android->window, _android->activity))
 			{
-				Abort(-1);
+				finish(-1);
 				break;
 			}
-			ANativeActivity_setWindowFlags(android->activity, AWINDOW_FLAG_FULLSCREEN, 0);
-			main_activity->OnSurfaceChanged(window->Width(), window->Height());
-			main_activity->OnSurfaceCreated();
-			counter->Start();
-			state = RUNNING;
+			_activity->onSurfaceCreated();
+			_activity->onSurfaceChanged(window->width(), window->height());
+			_state = RUNNING;
+			_counter->start();
 			break;
 			
 		case APP_CMD_GAINED_FOCUS:
-			main_activity->OnGainedFocus();
+			_activity->onGainedFocus();
 			break;
 			
 		case APP_CMD_PAUSE:
-			main_activity->OnPause();
+			_activity->onPause();
 			break;
 			
 		case APP_CMD_LOST_FOCUS:
-			main_activity->OnLostFocus();
+			_activity->onLostFocus();
 			break;
 			
 		case APP_CMD_STOP:
-			main_activity->OnStop();
+			_activity->onStop();
 			break;
 			
 		case APP_CMD_TERM_WINDOW:
-			counter->Pause();
-			state = STOPPED;
-			window->Destroy();
+			window->destroy();
+			_state = STOPPED;
 			break;
 			
 		case APP_CMD_DESTROY:
-			main_activity->OnDestroy();
+			_activity->onDestroy();
 			break;
 			
 		case APP_CMD_SAVE_STATE:
-			main_activity->OnSaveInstanceState(&android->savedState);
+			_activity->onSaveInstanceState(&_android->savedState);
 			break;
 			
 		case APP_CMD_WINDOW_REDRAW_NEEDED:
-			//main_activity->Redraw();
+			
 			break;
 	}
 }
 
-int Engine::InputProc(AInputEvent* event)
+int Engine::inputProc(AInputEvent* event)
 {
 	switch (AInputEvent_getType(event))
 	{
 		case AINPUT_EVENT_TYPE_MOTION:
-			input->ProcessTouch(event);
+			_input->processTouch(event);
 			return 1;
 	}
 	return 0;
 }
 
-void Engine::ActivityCall(android_app* android, int cmd)
+void Engine::activityCall(android_app* _android, int cmd)
 {
-	Engine* me = (Engine*) android->userData;
+	Engine* me = (Engine*) _android->userData;
 	if (me != nullptr)
 	{
-		me->ActivityProc(cmd);
+		me->activityProc(cmd);
 	}
 }
 
-int Engine::InputCall(android_app* android, AInputEvent* event)
+int Engine::inputCall(android_app* _android, AInputEvent* event)
 {
-	Engine* me = (Engine*) android->userData;
+	Engine* me = (Engine*) _android->userData;
 	if (me != nullptr)
 	{
-		return me->InputProc(event);
+		return me->inputProc(event);
 	}
 	return 0;
 }

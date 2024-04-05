@@ -1,71 +1,82 @@
-#include "activity.h"
-#include "window.h"
 #include <GLES3/gl32.h>
+#include <cstdlib>
+#include <cstring>
+#include "activity.h"
+#include "engine.h"
+#include "window.h"
+#include "event.h"
 
 Window* Activity::window = nullptr;
 Engine* Activity::engine = nullptr;
 
-void Activity::OnCreate(void* saved_state)
+void* saveState(void* data, unsigned sizeInBytes)
+{
+	void* saved = malloc(sizeInBytes);
+	memcpy(saved, data, sizeInBytes);
+	return saved;
+}
+
+void Activity::onCreate(void* savedState)
 {
 	
 }
 
-void Activity::OnStart()
+void Activity::onStart()
 {
 	
 }
 
-void Activity::OnResume()
+void Activity::onResume()
 {
 	
 }
 
-void Activity::OnPause()
+void Activity::onPause()
 {
 	
 }
 
-void Activity::OnStop()
+void Activity::onStop()
 {
 	
 }
 
-void Activity::OnDestroy()
+void Activity::onDestroy()
 {
 	
 }
 
-void Activity::OnSaveInstanceState(void** saved_state)
+void Activity::onSaveInstanceState(void** savedState)
 {
 	
 }
 
-void Activity::OnSurfaceCreated()
+void Activity::onSurfaceCreated()
 {
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 }
 
-void Activity::OnSurfaceChanged(int w, int h)
+void Activity::onSurfaceChanged(int w, int h)
 {
 	glViewport(0, 0, w, h);
 }
 
-void Activity::OnUpdate(const Event& event, float dt)
+void Activity::onUpdate(const Event& event, float dt)
 {
 	
 }
 
-void Activity::OnDrawFrame()
+void Activity::onDrawFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void Activity::OnGainedFocus()
+void Activity::onGainedFocus()
 {
 	
 }
 
-void Activity::OnLostFocus()
+void Activity::onLostFocus()
 {
 	
 }

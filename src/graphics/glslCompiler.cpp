@@ -1,100 +1,57 @@
 #include "graphics/glslCompiler.h"
 #include "utils/fileop.h"
-#include <GLES3/gl32.h>
 #include <sstream>
 
 GLSLCompiler::GLSLCompiler()
 {
-	program = vertex_shader = fragment_shader = 0;
-	vertex_name = fragment_name = nullptr;
-	error = NONE;
+	_program = _vertexShader = _fragmentShader = 0u;
+	_vertexShaderFilename = _fragmentShaderFilename = nullptr;
+	_error = NONE;
 }
 
 GLSLCompiler::~GLSLCompiler()
 {
-	Reset();
+	reset();
 }
 
-bool GLSLCompiler::Compile(const char* vert_filename, const char* frag_filename)
+bool GLSLCompiler::compile(const char* vertFilename, const char* fragFilename)
 {
-	Reset();
+	reset();
 	
-	vertex_name = vert_filename;
-	fragment_name = frag_filename;
+	_vertexShaderFilename = vertFilename;
+	_fragmentShaderFilename = fragFilename;
 	
-	program = glCreateProgram();
-	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glAttachShader(program, vertex_shader);
-	glAttachShader(program, fragment_shader);
+	_program = glCreateProgram();
+	_vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	
-	if (!Compile(vertex_shader, vert_filename))
+	if (!compile(_vertexShader, vertFilename))
 	{
-		error |= VERTEX_SHADER_ERROR;
+		_error |= VERTEX_SHADER_ERROR;
 	}
-	if (!Compile(fragment_shader, frag_filename))
+	if (!compile(_fragmentShader, fragFilename))
 	{
-		error |= FRAGMENT_SHADER_ERROR;
+		_error |= FRAGMENT_SHADER_ERROR;
 	}
 	
-	if (error & COMPILER_ERROR)
+	if (_error & COMPILER_ERROR)
 	{
 		return false;
 	}
 	
-	if (!Link())
+	if (!link())
 	{
-		error = LINKER_ERROR;
+		_error = LINKER_ERROR;
 		return false;
 	}
 	
 	return true;
 }
 
-std::string GLSLCompiler::Status() const
+bool GLSLCompiler::compile(unsigned shader, const char* sourceFile)
 {
-	std::stringstream status;
-	if (error == LINKER_ERROR)
-	{
-		status << "linker error:\n" << LinkerStatus() << "\n";
-		return status.str();
-	}
-	
-	if (error & VERTEX_SHADER_ERROR)
-	{
-		status << vertex_name << ":\n" << ShaderStatus(vertex_shader) << "\n";
-	}
-	if (error & FRAGMENT_SHADER_ERROR)
-	{
-		status << fragment_name << ":\n" << ShaderStatus(fragment_shader) << "\n";
-	}
-	return status.str();
-}
-
-std::string GLSLCompiler::ShaderStatus(unsigned shader) const
-{
-	int len;
-	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
-	std::string message;
-	message.resize(len - 1);
-	glGetShaderInfoLog(shader, len, nullptr, &message[0]);
-	return message;
-}
-
-std::string GLSLCompiler::LinkerStatus() const
-{
-	int len;
-	glGetProgramiv(program, GL_INFO_LOG_LENGTH, &len);
-	std::string message;
-	message.resize(len - 1);
-	glGetProgramInfoLog(program, len, nullptr, &message[0]);
-	return message;
-}
-
-bool GLSLCompiler::Compile(unsigned shader, const char* source_file)
-{
-	std::string source = ReadFileContent(source_file);
-	const char* code = source.c_str();
+	std::string content = readFileContent(sourceFile);
+	const char* code = content.c_str();
 	glShaderSource(shader, 1, &code, nullptr);
 	glCompileShader(shader);
 	
@@ -104,33 +61,77 @@ bool GLSLCompiler::Compile(unsigned shader, const char* source_file)
 	return status == GL_TRUE;
 }
 
-bool GLSLCompiler::Link()
+bool GLSLCompiler::link()
 {
-	glLinkProgram(program);
+	glAttachShader(_program, _vertexShader);
+	glAttachShader(_program, _fragmentShader);
+	glLinkProgram(_program);
 	int status;
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
+	glGetProgramiv(_program, GL_LINK_STATUS, &status);
 	return status == GL_TRUE;
 }
 
-void GLSLCompiler::Reset()
+std::string GLSLCompiler::status() const
 {
-	if (vertex_shader)
+	std::stringstream status;
+	status << "[!] " << _vertexShaderFilename << ":\n"
+	       << shaderStatus(_vertexShader) << "\n\n";
+	
+	status << "[!] " << _fragmentShaderFilename << ":\n"
+	       << shaderStatus(_fragmentShader) << "\n\n";
+	
+	status << "[!] linker:\n" << linkerStatus() << "\n";
+	
+	return status.str();
+}
+
+std::string GLSLCompiler::shaderStatus(unsigned shader) const
+{
+	int len;
+	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
+	if (len == 0)
 	{
-		//glDetachShader(program, vertex_shader);
-		glDeleteShader(vertex_shader);
+		return std::string("No errors or warnings detected");
 	}
-	if (fragment_shader)
+	std::string message;
+	message.resize(len - 1);
+	glGetShaderInfoLog(shader, len, nullptr, &message[0]);
+	return message;
+}
+
+std::string GLSLCompiler::linkerStatus() const
+{
+	int len;
+	glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &len);
+	if (len == 0)
 	{
-		//glDetachShader(program, fragment_shader);
-		glDeleteShader(fragment_shader);
+		return std::string("No errors or warnings detected");
 	}
-	if (program && error != NONE)
+	std::string message;
+	message.resize(len - 1);
+	glGetProgramInfoLog(_program, len, nullptr, &message[0]);
+	return message;
+}
+
+void GLSLCompiler::reset()
+{
+	if (_vertexShader != 0)
 	{
-		glDeleteProgram(program);
+		//glDetachShader(_program, _vertexShader);
+		glDeleteShader(_vertexShader);
+	}
+	if (_fragmentShader != 0)
+	{
+		//glDetachShader(_program, _fragmentShader);
+		glDeleteShader(_fragmentShader);
+	}
+	if (_program != 0 && _error != NONE)
+	{
+		glDeleteProgram(_program);
 	}
 	
-	program = vertex_shader = fragment_shader = 0;
-	vertex_name = fragment_name = nullptr;
-	error = NONE;
+	_program = _vertexShader = _fragmentShader = 0;
+	_vertexShaderFilename = _fragmentShaderFilename = nullptr;
+	_error = NONE;
 }
 

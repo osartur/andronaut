@@ -2,6 +2,6 @@
 #define ANUT_FILEOP_H
 #include <string>
 
-std::string ReadFileContent(const char* filename);
+std::string readFileContent(const char* filename);
 
 #endif

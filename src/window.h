@@ -1,63 +1,66 @@
 #if not defined(ANUT_WINDOW_H)
 #define ANUT_WINDOW_H
 #include <EGL/egl.h>
+#include <android/native_activity.h>
+#include <android/window.h>
 
 class Window
 {
 public:
-	static int red_size, green_size, blue_size, alpha_size,
-	           min_depth_size, min_stencil_size;
+	static int redSize, greenSize, blueSize, alphaSize,
+	           minDepthSize, minStencilSize;
 	
 	Window();
 	
-	bool Init(ANativeWindow* window);
-	void Destroy();
+	bool init(ANativeWindow* hNW, ANativeActivity* hNA);
+	void destroy();
 	
-	int Width() const;
-	int Height() const;
-	float AspectRatio() const;
-	bool IsOpen() const;
-	void Display() const;
+	int width() const;
+	int height() const;
+	float aspectRatio() const;
+	
+	void display() const;
+	void setFlags(unsigned flags, unsigned mask);
 	
 private:
-	bool ChooseConfig(const int attributes[]);
-	bool MatchConfig(EGLConfig target, const int attributes[]);
-	bool IsMinAttrValue(int attribute);
+	bool chooseConfig(const int attributes[]);
+	bool matchConfig(EGLConfig target, const int attributes[]);
+	bool isRestrictedAttrib(int attribute);
 	
-	EGLDisplay display;
-	EGLConfig  config;
-	EGLSurface surface;
-	EGLContext context;
-	int width;
-	int height;
-	float aspect;
-	bool open;
+	EGLDisplay _display;
+	EGLConfig  _config;
+	EGLSurface _surface;
+	EGLContext _context;
+	ANativeActivity* _activity;
+	int _width;
+	int _height;
+	float _aspect;
 };
 
 
-inline int Window::Width() const
+inline int Window::width() const
 {
-	return width;
+	return _width;
 }
 
-inline int Window::Height() const
+inline int Window::height() const
 {
-	return height;
+	return _height;
 }
 
-inline float Window::AspectRatio() const
+inline float Window::aspectRatio() const
 {
-	return aspect;
+	return _aspect;
 }
 
-inline bool Window::IsOpen() const
+inline void Window::display() const
 {
-	return open;
+	eglSwapBuffers(_display, _surface);
 }
 
-inline void Window::Display() const
+inline void Window::setFlags(unsigned flags, unsigned mask)
 {
-	eglSwapBuffers(display, surface);
+	ANativeActivity_setWindowFlags(_activity, flags, mask);
 }
 
 #endif

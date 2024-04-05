@@ -10,28 +10,27 @@ public:
 	Timer();
 	virtual ~Timer() = default;
 	
-	void Start();
-	void Pause();
-	float Restart();
-	float Elapsed() const;
-	bool Elapsed(float secs) const;
-	bool IsPaused() const;
+	void start();
+	void pause();
+	float restart();
+	float elapsed() const;
+	bool isPaused() const;
 	
 private:
-	static high_resolution_clock::time_point Now();
+	static high_resolution_clock::time_point now();
 	
-	high_resolution_clock::time_point m_start;
-	high_resolution_clock::time_point m_end;
-	bool m_paused;
+	high_resolution_clock::time_point _start;
+	high_resolution_clock::time_point _end;
+	bool _paused;
 };
 
 
-inline bool Timer::IsPaused() const
+inline bool Timer::isPaused() const
 {
-	return m_paused;
+	return _paused;
 }
 
-inline high_resolution_clock::time_point Timer::Now()
+inline high_resolution_clock::time_point Timer::now()
 {
 	return high_resolution_clock::now();
 }

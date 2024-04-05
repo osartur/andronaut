@@ -9,7 +9,7 @@ struct Input
 {
 	Event event;
 	
-	void ProcessTouch(AInputEvent* ev);
+	void processTouch(AInputEvent* ev);
 };
 
 #endif
