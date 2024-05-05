@@ -3,6 +3,8 @@
 #include <GLES3/gl32.h>
 #include <string>
 
+namespace anut
+{
 class GLSLCompiler
 {
 public:
@@ -43,5 +45,6 @@ inline unsigned GLSLCompiler::shaderId() const
 {
 	return _error == NONE ? _program : 0u;
 }
+} // anut namespace
 
 #endif

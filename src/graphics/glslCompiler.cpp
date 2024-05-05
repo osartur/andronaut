@@ -2,6 +2,8 @@
 #include "utils/fileop.h"
 #include <sstream>
 
+namespace anut
+{
 GLSLCompiler::GLSLCompiler()
 {
 	_program = _vertexShader = _fragmentShader = 0u;
@@ -134,4 +136,4 @@ void GLSLCompiler::reset()
 	_vertexShaderFilename = _fragmentShaderFilename = nullptr;
 	_error = NONE;
 }
-
+} // anut namespace

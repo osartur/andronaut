@@ -3,9 +3,7 @@
 #include <android/input.h>
 #include "android_native_app_glue.h"
 #include "activity.h"
-#include "input.h"
 #include "engine.h"
-#include "utils/timer.h"
 #include "window.h"
 
 Window* Engine::window = nullptr;
@@ -13,16 +11,13 @@ Window* Engine::window = nullptr;
 Engine::Engine(android_app* app)
 {
 	window = new Window;
-	_input = new Input;
-	_counter = new Timer;
 	
 	_android = app;
 	_android->userData = this;
 	_android->onAppCmd = activityCall;
 	_android->onInputEvent = inputCall;
 	
-	_output.code = 0;
-	_activity = nullptr;
+	_exitCode = 0;
 	
 	Activity::window = window;
 	Activity::engine = this;
@@ -31,11 +26,9 @@ Engine::Engine(android_app* app)
 Engine::~Engine()
 {
 	delete window;
-	delete _input;
-	delete _counter;
 }
 
-ProgramExit Engine::start(Activity* activity)
+int Engine::run(Activity* activity)
 {
 	_activity = activity;
 	_activity->onCreate(_android->savedState);
@@ -53,22 +46,19 @@ ProgramExit Engine::start(Activity* activity)
 			}
 			if (_android->destroyRequested != 0)
 			{
-				return _output;
+				return _exitCode;
 			}
 		}
 		_activity->onDrawFrame();
 		window->display();
-		_activity->onUpdate(_input->event, _counter->restart());
-		_input->event.type = Event::NONE;
 	}
 }
 
-void Engine::finish(int status, std::string msg)
+void Engine::finish(int status)
 {
 	ANativeActivity_finish(_android->activity);
 	_state = STOPPED;
-	_output.code = status;
-	_output.message = msg;
+	_exitCode = status;
 }
 
 void Engine::activityProc(int cmd)
@@ -92,7 +82,6 @@ void Engine::activityProc(int cmd)
 			_activity->onSurfaceCreated();
 			_activity->onSurfaceChanged(window->width(), window->height());
 			_state = RUNNING;
-			_counter->start();
 			break;
 			
 		case APP_CMD_GAINED_FOCUS:
@@ -113,6 +102,7 @@ void Engine::activityProc(int cmd)
 			
 		case APP_CMD_TERM_WINDOW:
 			window->destroy();
+			_activity->onSurfaceDestroyed();
 			_state = STOPPED;
 			break;
 			
@@ -124,19 +114,19 @@ void Engine::activityProc(int cmd)
 			_activity->onSaveInstanceState(&_android->savedState);
 			break;
 			
-		case APP_CMD_WINDOW_REDRAW_NEEDED:
-			
-			break;
+		//case APP_CMD_WINDOW_REDRAW_NEEDED:
+		//	break;
 	}
 }
 
 int Engine::inputProc(AInputEvent* event)
 {
-	switch (AInputEvent_getType(event))
+	int type = AInputEvent_getType(event);
+	if (type == AINPUT_EVENT_TYPE_MOTION)
 	{
-		case AINPUT_EVENT_TYPE_MOTION:
-			_input->processTouch(event);
-			return 1;
+		MotionEvent motion(event);
+		_activity->onTouchEvent(motion);
+		return 1;
 	}
 	return 0;
 }

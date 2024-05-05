@@ -2,6 +2,8 @@
 #define ANUT_BUFFER_H
 #include <GLES3/gl32.h>
 
+namespace anut
+{
 class GPUBuffer
 {
 public:
@@ -29,11 +31,11 @@ inline GLenum GPUBuffer::type() const
 }
 
 
-class VertexArray
+class VertexLayout
 {
 public:
-	VertexArray();
-	virtual ~VertexArray();
+	VertexLayout();
+	virtual ~VertexLayout();
 	
 	void vertexBuffer(unsigned attribIndex, const GPUBuffer& target, int subAttribCount, GLenum subAttribType, bool normalized, int stride, int offset);
 	void indexBuffer(const GPUBuffer& target);
@@ -43,5 +45,6 @@ public:
 private:
 	unsigned _id;
 };
+} // anut namespace
 
 #endif

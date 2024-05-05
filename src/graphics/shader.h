@@ -4,6 +4,8 @@
 #include <unordered_map>
 #include <string>
 
+namespace anut
+{
 class Shader
 {
 public:
@@ -24,5 +26,6 @@ inline void Shader::use()
 {
 	glUseProgram(_id);
 }
+} // anut namespace
 
 #endif

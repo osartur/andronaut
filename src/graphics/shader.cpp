@@ -1,5 +1,7 @@
 #include "graphics/shader.h"
 
+namespace anut
+{
 Shader::Shader(unsigned shaderId)
 {
 	_id = shaderId;
@@ -35,4 +37,5 @@ int Shader::operator[](const std::string& uniformName)
 	
 	return location;
 }
+} // anut namespace
 

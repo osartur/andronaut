@@ -1,5 +1,7 @@
 #include "graphics/buffer.h"
 
+namespace anut
+{
 // ********* GPU BUFFER ********* 
 
 GPUBuffer::GPUBuffer(GLenum bufferType)
@@ -17,30 +19,28 @@ void GPUBuffer::alloc(GLsizeiptr size, GLenum usage, const void* initialData)
 {
 	glBindBuffer(_type, _id);
 	glBufferData(_type, size, initialData, usage);
-	glBindBuffer(_type, 0);
 }
 
 void GPUBuffer::copyData(const void* data, GLsizeiptr size, GLintptr offset)
 {
 	glBindBuffer(_type, _id);
 	glBufferSubData(_type, offset, size, data);
-	glBindBuffer(_type, 0);
 }
 
 
-// ********* VERTEX ARRAY ********* 
+// ********* VERTEX LAYOUT ********* 
 
-VertexArray::VertexArray()
+VertexLayout::VertexLayout()
 {
 	glGenVertexArrays(1, &_id);
 }
 
-VertexArray::~VertexArray()
+VertexLayout::~VertexLayout()
 {
 	glDeleteVertexArrays(1, &_id);
 }
 
-void VertexArray::vertexBuffer(unsigned attribIndex, const GPUBuffer& target, int subAttribCount, GLenum subAttribType, bool normalized, int stride, int offset)
+void VertexLayout::vertexBuffer(unsigned attribIndex, const GPUBuffer& target, int subAttribCount, GLenum subAttribType, bool normalized, int stride, int offset)
 {
 	if (target.type() != GL_ARRAY_BUFFER)
 	{
@@ -55,7 +55,7 @@ void VertexArray::vertexBuffer(unsigned attribIndex, const GPUBuffer& target, in
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void VertexArray::indexBuffer(const GPUBuffer& target)
+void VertexLayout::indexBuffer(const GPUBuffer& target)
 {
 	if (target.type() != GL_ELEMENT_ARRAY_BUFFER)
 	{
@@ -68,17 +68,16 @@ void VertexArray::indexBuffer(const GPUBuffer& target)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void VertexArray::draw(GLenum primitive, int count) const
+void VertexLayout::draw(GLenum primitive, int count) const
 {
 	glBindVertexArray(_id);
 	glDrawArrays(primitive, 0, count);
-	glBindVertexArray(0);
 }
 
-void VertexArray::drawIndexed(GLenum primitive, int count, GLenum indexType) const
+void VertexLayout::drawIndexed(GLenum primitive, int count, GLenum indexType) const
 {
 	glBindVertexArray(_id);
 	glDrawElements(primitive, count, indexType, (void*) 0);
-	glBindVertexArray(0);
 }
+} // anut namespace
 

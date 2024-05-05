@@ -1,28 +1,17 @@
 #if not defined(ANUT_EVENT_H)
 #define ANUT_EVENT_H
+#include <android/input.h>
 
-struct Event
+struct MotionEvent
 {
-	enum Type 
-	{
-		NONE = 0,
-		FINGER_DOWN,
-		FINGER_UP,
-		FINGER_MOTION
-	};
+	enum { ACTION_DOWN = 0, ACTION_MOVE, ACTION_UP };
 	
-	struct Finger
-	{
-		int id;
-		int x;
-		int y;
-	};
+	MotionEvent(const AInputEvent* ev);
 	
-	int type = NONE;
-	union
-	{
-		Finger touch;
-	};
+	int action;
+	int id;
+	float x;
+	float y;
 };
 
 #endif

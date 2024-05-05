@@ -36,13 +36,13 @@ bool Window::init(ANativeWindow* hNW, ANativeActivity* hNA)
 		EGL_NONE
 	};
 	
-	const int renderBuffer[] =
+	const int surfaceConfig[] =
 	{
 		EGL_RENDER_BUFFER, EGL_BACK_BUFFER,
 		EGL_NONE
 	};
 	
-	const int glesVersion[] =
+	const int contextConfig[] =
 	{
 		EGL_CONTEXT_MAJOR_VERSION_KHR, 3,
 		EGL_CONTEXT_MINOR_VERSION_KHR, 2,
@@ -57,8 +57,8 @@ bool Window::init(ANativeWindow* hNW, ANativeActivity* hNA)
 		return false;
 	}
 	
-	_surface = EGL_CALL(eglCreateWindowSurface(_display, _config, hNW, renderBuffer));
-	_context = EGL_CALL(eglCreateContext(_display, _config, EGL_NO_CONTEXT, glesVersion));
+	_surface = EGL_CALL(eglCreateWindowSurface(_display, _config, hNW, surfaceConfig));
+	_context = EGL_CALL(eglCreateContext(_display, _config, EGL_NO_CONTEXT, contextConfig));
 	EGL_CALL(eglMakeCurrent(_display, _surface, _surface, _context));
 	EGL_CALL(eglSwapInterval(_display, 0));
 	
@@ -95,16 +95,16 @@ bool Window::matchConfig(EGLConfig target, const int attributes[])
 	{
 		int value;
 		EGL_CALL(eglGetConfigAttrib(_display, target, attributes[i], &value));
-		int required = attributes[i+1];
+		int requiredValue = attributes[i+1];
 		
 		if (isRestrictedAttrib(attributes[i]))
 		{
-			if (value != required)
+			if (value != requiredValue)
 			{
 				return false;
 			}
 		}
-		else if (value < required)
+		else if (value < requiredValue)
 		{
 			return false;
 		}

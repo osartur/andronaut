@@ -56,19 +56,24 @@ void Activity::onSurfaceCreated()
 	glClearColor(0.f, 0.f, 0.f, 1.f);
 }
 
+void Activity::onSurfaceDestroyed()
+{
+	
+}
+
 void Activity::onSurfaceChanged(int w, int h)
 {
 	glViewport(0, 0, w, h);
 }
 
-void Activity::onUpdate(const Event& event, float dt)
-{
-	
-}
-
 void Activity::onDrawFrame()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+void Activity::onTouchEvent(const MotionEvent& event)
+{
+	
 }
 
 void Activity::onGainedFocus()

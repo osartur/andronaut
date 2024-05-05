@@ -1,10 +1,10 @@
 #if not defined(ANUT_ACTIVITY_H)
 #define ANUT_ACTIVITY_H
+#include "event.h"
 
 class android_app;
 class Window;
 class Engine;
-class Event;
 
 void* saveState(void* data, unsigned sizeInBytes);
 
@@ -24,8 +24,10 @@ public:
 	
 	virtual void onSurfaceCreated();
 	virtual void onSurfaceChanged(int w, int h);
-	virtual void onUpdate(const Event& event, float dt);
+	virtual void onSurfaceDestroyed();
 	virtual void onDrawFrame();
+	
+	virtual void onTouchEvent(const MotionEvent& event);
 	
 	virtual void onGainedFocus();
 	virtual void onLostFocus();

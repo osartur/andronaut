@@ -5,15 +5,7 @@
 class android_app;
 class AInputEvent;
 class Window;
-class Input;
 class Activity;
-class Timer;
-
-struct ProgramExit
-{
-	int code;
-	std::string message;
-};
 
 class Engine
 {
@@ -23,8 +15,8 @@ public:
 	Engine(android_app* app);
 	virtual ~Engine();
 	
-	ProgramExit start(Activity* activity);
-	void finish(int status, std::string msg = std::string());
+	int run(Activity* activity);
+	void finish(int status);
 	
 private:
 	static void activityCall(android_app* android, int cmd);
@@ -40,10 +32,8 @@ private:
 	
 	android_app* _android;
 	Activity* _activity;
-	Input* _input;
-	Timer* _counter;
 	int _state;
-	ProgramExit _output;
+	int _exitCode;
 };
 
 #endif
