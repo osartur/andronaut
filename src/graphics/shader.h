@@ -13,7 +13,7 @@ public:
 	Shader();
 	~Shader();
 	
-	int operator[](const std::string& uniformName);
+	int uniform(const std::string& uniformName);
 	void use();
 	
 private:

@@ -2,8 +2,8 @@
 #define ANUT_TIMER_H
 #include <chrono>
 
-using std::chrono::high_resolution_clock;
-
+namespace anut
+{
 class Timer
 {
 public:
@@ -17,10 +17,10 @@ public:
 	bool isPaused() const;
 	
 private:
-	static high_resolution_clock::time_point now();
+	static std::chrono::high_resolution_clock::time_point now();
 	
-	high_resolution_clock::time_point _start;
-	high_resolution_clock::time_point _end;
+	std::chrono::high_resolution_clock::time_point _start;
+	std::chrono::high_resolution_clock::time_point _end;
 	bool _paused;
 };
 
@@ -30,9 +30,10 @@ inline bool Timer::isPaused() const
 	return _paused;
 }
 
-inline high_resolution_clock::time_point Timer::now()
+inline std::chrono::high_resolution_clock::time_point Timer::now()
 {
-	return high_resolution_clock::now();
+	return std::chrono::high_resolution_clock::now();
 }
+} // anut namespace
 
 #endif

@@ -4,6 +4,9 @@
 
 class android_app;
 class AInputEvent;
+
+namespace anut
+{
 class Window;
 class Activity;
 
@@ -11,29 +14,32 @@ class Engine
 {
 public:
 	static Window* window;
+	static android_app* state;
+	
+	static void finish(int status);
 	
 	Engine(android_app* app);
 	virtual ~Engine();
 	
 	int run(Activity* activity);
-	void finish(int status);
 	
 private:
-	static void activityCall(android_app* android, int cmd);
-	static int inputCall(android_app* android, AInputEvent* event);
-	void activityProc(int cmd);
-	int inputProc(AInputEvent* event);
-	
 	enum State : int
 	{
 		STOPPED = -1,
 		RUNNING = 0
 	};
 	
-	android_app* _android;
-	Activity* _activity;
-	int _state;
-	int _exitCode;
+	static int loopState;
+	static int exitCode;
+	
+	static void activityCall(android_app* android, int cmd);
+	static int inputCall(android_app* android, AInputEvent* event);
+	void activityProc(int cmd);
+	int inputProc(AInputEvent* event);
+	
+	Activity* _userActivity;
 };
+} // anut namespace
 
 #endif

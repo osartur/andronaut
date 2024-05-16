@@ -4,6 +4,8 @@
 #include <cstring>
 #include <vector>
 
+namespace anut
+{
 int Window::redSize = 8;
 int Window::blueSize = 8;
 int Window::greenSize = 8;
@@ -143,3 +145,4 @@ void Window::destroy()
 	
 	memset(this, 0, sizeof(Window));
 }
+} // anut namespace

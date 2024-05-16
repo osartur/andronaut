@@ -2,13 +2,10 @@
 #include <cstdlib>
 #include <cstring>
 #include "activity.h"
-#include "engine.h"
-#include "window.h"
 #include "event.h"
 
-Window* Activity::window = nullptr;
-Engine* Activity::engine = nullptr;
-
+namespace anut
+{
 void* saveState(void* data, unsigned sizeInBytes)
 {
 	void* saved = malloc(sizeInBytes);
@@ -66,7 +63,7 @@ void Activity::onSurfaceChanged(int w, int h)
 	glViewport(0, 0, w, h);
 }
 
-void Activity::onDrawFrame()
+void Activity::onUpdate()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -85,4 +82,4 @@ void Activity::onLostFocus()
 {
 	
 }
-
+} // anut namespace

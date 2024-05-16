@@ -4,6 +4,8 @@
 #include <android/native_activity.h>
 #include <android/window.h>
 
+namespace anut
+{
 class Window
 {
 public:
@@ -62,5 +64,6 @@ inline void Window::setFlags(unsigned flags, unsigned mask)
 {
 	ANativeActivity_setWindowFlags(_activity, flags, mask);
 }
+} // anut namespace
 
 #endif

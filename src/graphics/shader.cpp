@@ -21,7 +21,7 @@ Shader::~Shader()
 	}
 }
 
-int Shader::operator[](const std::string& uniformName)
+int Shader::uniform(const std::string& uniformName)
 {
 	auto ref = _uniformCache.find(uniformName);
 	if (ref != _uniformCache.end())

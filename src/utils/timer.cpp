@@ -4,6 +4,8 @@
 using std::chrono::duration_cast;
 using std::chrono::duration;
 
+namespace anut
+{
 Timer::Timer()
 {
 	_paused = false;
@@ -35,7 +37,7 @@ void Timer::pause()
 
 float Timer::restart()
 {
-	high_resolution_clock::duration elapsed;
+	std::chrono::high_resolution_clock::duration elapsed;
 	if (_paused)
 	{
 		elapsed = _end - _start;
@@ -57,4 +59,4 @@ float Timer::elapsed() const
 	auto elapsed = duration_cast<duration<float>>(end - _start);
 	return elapsed.count();
 }
-
+} // anut namespace

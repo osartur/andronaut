@@ -6,21 +6,22 @@
 #include "engine.h"
 #include "window.h"
 
+namespace anut
+{
 Window* Engine::window = nullptr;
+android_app* Engine::state = nullptr;
+int Engine::loopState = STOPPED;
+int Engine::exitCode = 0;
 
 Engine::Engine(android_app* app)
 {
 	window = new Window;
+	state = app;
 	
-	_android = app;
-	_android->userData = this;
-	_android->onAppCmd = activityCall;
-	_android->onInputEvent = inputCall;
-	
-	_exitCode = 0;
-	
-	Activity::window = window;
-	Activity::engine = this;
+	state = app;
+	state->userData = this;
+	state->onAppCmd = activityCall;
+	state->onInputEvent = inputCall;
 }
 
 Engine::~Engine()
@@ -30,35 +31,34 @@ Engine::~Engine()
 
 int Engine::run(Activity* activity)
 {
-	_activity = activity;
-	_activity->onCreate(_android->savedState);
-	_state = STOPPED;
+	_userActivity = activity;
+	_userActivity->onCreate(state->savedState);
+	loopState = STOPPED;
 	
 	while (true)
 	{
 		android_poll_source* source = nullptr;
 		int fd, event;
-		while (ALooper_pollOnce(_state, &fd, &event, (void**) &source) >= 0)
+		while (ALooper_pollOnce(loopState, &fd, &event, (void**) &source) >= 0)
 		{
 			if (source != nullptr)
 			{
-				source->process(_android, source);
+				source->process(state, source);
 			}
-			if (_android->destroyRequested != 0)
+			if (state->destroyRequested != 0)
 			{
-				return _exitCode;
+				return exitCode;
 			}
 		}
-		_activity->onDrawFrame();
-		window->display();
+		_userActivity->onUpdate();
 	}
 }
 
 void Engine::finish(int status)
 {
-	ANativeActivity_finish(_android->activity);
-	_state = STOPPED;
-	_exitCode = status;
+	ANativeActivity_finish(state->activity);
+	loopState = STOPPED;
+	exitCode = status;
 }
 
 void Engine::activityProc(int cmd)
@@ -66,52 +66,52 @@ void Engine::activityProc(int cmd)
 	switch (cmd)
 	{
 		case APP_CMD_START:
-			_activity->onStart();
+			_userActivity->onStart();
 			break;
 			
 		case APP_CMD_RESUME:
-			_activity->onResume();
+			_userActivity->onResume();
 			break;
 			
 		case APP_CMD_INIT_WINDOW:
-			if (!window->init(_android->window, _android->activity))
+			if (!window->init(state->window, state->activity))
 			{
 				finish(-1);
 				break;
 			}
-			_activity->onSurfaceCreated();
-			_activity->onSurfaceChanged(window->width(), window->height());
-			_state = RUNNING;
+			_userActivity->onSurfaceCreated();
+			_userActivity->onSurfaceChanged(window->width(), window->height());
+			loopState = RUNNING;
 			break;
 			
 		case APP_CMD_GAINED_FOCUS:
-			_activity->onGainedFocus();
+			_userActivity->onGainedFocus();
 			break;
 			
 		case APP_CMD_PAUSE:
-			_activity->onPause();
+			_userActivity->onPause();
 			break;
 			
 		case APP_CMD_LOST_FOCUS:
-			_activity->onLostFocus();
+			_userActivity->onLostFocus();
 			break;
 			
 		case APP_CMD_STOP:
-			_activity->onStop();
+			_userActivity->onStop();
 			break;
 			
 		case APP_CMD_TERM_WINDOW:
 			window->destroy();
-			_activity->onSurfaceDestroyed();
-			_state = STOPPED;
+			_userActivity->onSurfaceDestroyed();
+			loopState = STOPPED;
 			break;
 			
 		case APP_CMD_DESTROY:
-			_activity->onDestroy();
+			_userActivity->onDestroy();
 			break;
 			
 		case APP_CMD_SAVE_STATE:
-			_activity->onSaveInstanceState(&_android->savedState);
+			_userActivity->onSaveInstanceState(&state->savedState);
 			break;
 			
 		//case APP_CMD_WINDOW_REDRAW_NEEDED:
@@ -125,27 +125,28 @@ int Engine::inputProc(AInputEvent* event)
 	if (type == AINPUT_EVENT_TYPE_MOTION)
 	{
 		MotionEvent motion(event);
-		_activity->onTouchEvent(motion);
+		_userActivity->onTouchEvent(motion);
 		return 1;
 	}
 	return 0;
 }
 
-void Engine::activityCall(android_app* _android, int cmd)
+void Engine::activityCall(android_app* state, int cmd)
 {
-	Engine* me = (Engine*) _android->userData;
+	Engine* me = (Engine*) state->userData;
 	if (me != nullptr)
 	{
 		me->activityProc(cmd);
 	}
 }
 
-int Engine::inputCall(android_app* _android, AInputEvent* event)
+int Engine::inputCall(android_app* state, AInputEvent* event)
 {
-	Engine* me = (Engine*) _android->userData;
+	Engine* me = (Engine*) state->userData;
 	if (me != nullptr)
 	{
 		return me->inputProc(event);
 	}
 	return 0;
 }
+} // anut namespace

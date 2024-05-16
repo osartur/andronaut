@@ -1,5 +1,7 @@
 #include "event.h"
 
+namespace anut
+{
 MotionEvent::MotionEvent(const AInputEvent* ev)
 {
 	int flags = AMotionEvent_getAction(ev);
@@ -27,4 +29,4 @@ MotionEvent::MotionEvent(const AInputEvent* ev)
 			break;
 	}
 }
-
+} // anut namespace

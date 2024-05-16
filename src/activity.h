@@ -2,18 +2,13 @@
 #define ANUT_ACTIVITY_H
 #include "event.h"
 
-class android_app;
-class Window;
-class Engine;
-
+namespace anut
+{
 void* saveState(void* data, unsigned sizeInBytes);
 
 class Activity
 {
 public:
-	static Window* window;
-	static Engine* engine;
-	
 	virtual void onCreate(void* savedState);
 	virtual void onStart();
 	virtual void onResume();
@@ -25,12 +20,13 @@ public:
 	virtual void onSurfaceCreated();
 	virtual void onSurfaceChanged(int w, int h);
 	virtual void onSurfaceDestroyed();
-	virtual void onDrawFrame();
+	virtual void onUpdate();
 	
 	virtual void onTouchEvent(const MotionEvent& event);
 	
 	virtual void onGainedFocus();
 	virtual void onLostFocus();
 };
+} // anut namespace
 
 #endif

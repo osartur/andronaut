@@ -1,6 +1,8 @@
 #include "utils/fileop.h"
 #include <fstream>
 
+namespace anut
+{
 std::string readFileContent(const char* filename)
 {
 	std::ifstream f{filename};
@@ -16,4 +18,5 @@ std::string readFileContent(const char* filename)
 	f.close();
 	return content;
 }
+} // anut namespace
 
