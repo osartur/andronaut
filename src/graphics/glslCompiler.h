@@ -12,38 +12,34 @@ public:
 	virtual ~GLSLCompiler();
 	
 	bool compile(const char* vertFilename, const char* fragFilename);
+	const std::string& status() const;
 	unsigned shaderId() const;
-	std::string status() const;
 	
 private:
 	bool compile(unsigned shader, const char* sourceFile);
 	bool link();
 	void reset();
-	
+	void logErrors();
 	std::string shaderStatus(unsigned shader) const;
 	std::string linkerStatus() const;
-	
-	enum Error : int
-	{
-		NONE = 0b0,
-		VERTEX_SHADER_ERROR = 0b1,
-		FRAGMENT_SHADER_ERROR = 0b10,
-		COMPILER_ERROR = VERTEX_SHADER_ERROR | FRAGMENT_SHADER_ERROR,
-		LINKER_ERROR = 0b100
-	};
 	
 	const char* _vertexShaderFilename;
 	const char* _fragmentShaderFilename;
 	unsigned _program;
 	unsigned _vertexShader;
 	unsigned _fragmentShader;
-	int _error;
+	std::string _log;
+	bool _hasFailed;
 };
 
+inline const std::string& GLSLCompiler::status() const
+{
+	return _log;
+}
 
 inline unsigned GLSLCompiler::shaderId() const 
 {
-	return _error == NONE ? _program : 0u;
+	return _hasFailed ? 0u : _program;
 }
 } // anut namespace
 

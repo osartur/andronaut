@@ -4,6 +4,11 @@
 #include <cstring>
 #include <vector>
 
+#define EGL_CALL(fcall)                   \
+        fcall;                            \
+        if (eglGetError() != EGL_SUCCESS) \
+            return false;
+
 namespace anut
 {
 int Window::redSize = 8;
@@ -12,11 +17,6 @@ int Window::greenSize = 8;
 int Window::alphaSize = 8;
 int Window::minDepthSize = 0;
 int Window::minStencilSize = 0;
-
-#define EGL_CALL(fcall)                   \
-        fcall;                            \
-        if (eglGetError() != EGL_SUCCESS) \
-            return false;
 
 Window::Window()
 {

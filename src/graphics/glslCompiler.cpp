@@ -8,7 +8,7 @@ GLSLCompiler::GLSLCompiler()
 {
 	_program = _vertexShader = _fragmentShader = 0u;
 	_vertexShaderFilename = _fragmentShaderFilename = nullptr;
-	_error = NONE;
+	_hasFailed = false;
 }
 
 GLSLCompiler::~GLSLCompiler()
@@ -19,34 +19,20 @@ GLSLCompiler::~GLSLCompiler()
 bool GLSLCompiler::compile(const char* vertFilename, const char* fragFilename)
 {
 	reset();
-	
 	_vertexShaderFilename = vertFilename;
 	_fragmentShaderFilename = fragFilename;
-	
 	_program = glCreateProgram();
 	_vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	
-	if (!compile(_vertexShader, vertFilename))
+	if (!(compile(_vertexShader, vertFilename) &&
+	      compile(_fragmentShader, fragFilename) &&
+	      link()))
 	{
-		_error |= VERTEX_SHADER_ERROR;
-	}
-	if (!compile(_fragmentShader, fragFilename))
-	{
-		_error |= FRAGMENT_SHADER_ERROR;
-	}
-	
-	if (_error & COMPILER_ERROR)
-	{
+		logErrors();
+		_hasFailed = true;
 		return false;
 	}
-	
-	if (!link())
-	{
-		_error = LINKER_ERROR;
-		return false;
-	}
-	
 	return true;
 }
 
@@ -56,10 +42,8 @@ bool GLSLCompiler::compile(unsigned shader, const char* sourceFile)
 	const char* code = content.c_str();
 	glShaderSource(shader, 1, &code, nullptr);
 	glCompileShader(shader);
-	
 	int status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-	
 	return status == GL_TRUE;
 }
 
@@ -73,7 +57,7 @@ bool GLSLCompiler::link()
 	return status == GL_TRUE;
 }
 
-std::string GLSLCompiler::status() const
+void GLSLCompiler::logErrors()
 {
 	std::stringstream status;
 	status << "[!] " << _vertexShaderFilename << ":\n"
@@ -83,8 +67,7 @@ std::string GLSLCompiler::status() const
 	       << shaderStatus(_fragmentShader) << "\n\n";
 	
 	status << "[!] linker:\n" << linkerStatus() << "\n";
-	
-	return status.str();
+	_log = status.str();
 }
 
 std::string GLSLCompiler::shaderStatus(unsigned shader) const
@@ -127,13 +110,13 @@ void GLSLCompiler::reset()
 		//glDetachShader(_program, _fragmentShader);
 		glDeleteShader(_fragmentShader);
 	}
-	if (_program != 0 && _error != NONE)
+	if (_program != 0 && _hasFailed)
 	{
 		glDeleteProgram(_program);
 	}
 	
-	_program = _vertexShader = _fragmentShader = 0;
+	_program = _vertexShader = _fragmentShader = 0u;
 	_vertexShaderFilename = _fragmentShaderFilename = nullptr;
-	_error = NONE;
+	_hasFailed = false;
 }
 } // anut namespace

@@ -17,8 +17,6 @@ Engine::Engine(android_app* app)
 {
 	window = new Window;
 	state = app;
-	
-	state = app;
 	state->userData = this;
 	state->onAppCmd = activityCall;
 	state->onInputEvent = inputCall;
