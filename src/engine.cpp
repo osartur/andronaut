@@ -42,10 +42,10 @@ int Engine::run(Activity* activity)
 			if (source != nullptr)
 			{
 				source->process(state, source);
-			}
-			if (state->destroyRequested != 0)
-			{
-				return exitCode;
+				if (state->destroyRequested != 0)
+				{
+					return exitCode;
+				}
 			}
 		}
 		_userActivity->onUpdate();
