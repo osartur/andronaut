@@ -1,6 +1,6 @@
 #if not defined(ANUT_ACTIVITY_H)
 #define ANUT_ACTIVITY_H
-#include "event.h"
+#include <android/input.h>
 
 namespace anut
 {
@@ -20,9 +20,9 @@ public:
 	virtual void onSurfaceCreated();
 	virtual void onSurfaceChanged(int w, int h);
 	virtual void onSurfaceDestroyed();
-	virtual void onUpdate();
 	
-	virtual void onTouchEvent(const MotionEvent& event);
+	virtual void onProcessApp();
+	virtual int onInputEvent(AInputEvent* event);
 	
 	virtual void onGainedFocus();
 	virtual void onLostFocus();

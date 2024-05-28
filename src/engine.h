@@ -24,6 +24,9 @@ public:
 	int run(Activity* activity);
 	
 private:
+	static int inputProc(android_app* android, AInputEvent* event);
+	static void activityProc(android_app* android, int cmd);
+	
 	enum State : int
 	{
 		STOPPED = -1,
@@ -32,13 +35,7 @@ private:
 	
 	static int loopState;
 	static int exitCode;
-	
-	static void activityCall(android_app* android, int cmd);
-	static int inputCall(android_app* android, AInputEvent* event);
-	void activityProc(int cmd);
-	int inputProc(AInputEvent* event);
-	
-	Activity* _userActivity;
+	static Activity* userActivity;
 };
 } // anut namespace
 

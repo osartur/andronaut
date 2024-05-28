@@ -1,6 +1,7 @@
 #if not defined(ANUT_EVENT_H)
 #define ANUT_EVENT_H
-#include <android/input.h>
+
+class AInputEvent;
 
 namespace anut
 {

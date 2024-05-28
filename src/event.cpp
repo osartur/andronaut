@@ -1,4 +1,5 @@
 #include "event.h"
+#include <android/input.h>
 
 namespace anut
 {

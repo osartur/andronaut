@@ -12,14 +12,15 @@ Window* Engine::window = nullptr;
 android_app* Engine::state = nullptr;
 int Engine::loopState = STOPPED;
 int Engine::exitCode = 0;
+Activity* Engine::userActivity = nullptr;
 
 Engine::Engine(android_app* app)
 {
 	window = new Window;
 	state = app;
-	state->userData = this;
-	state->onAppCmd = activityCall;
-	state->onInputEvent = inputCall;
+	state->userData = nullptr;
+	state->onAppCmd = activityProc;
+	state->onInputEvent = inputProc;
 }
 
 Engine::~Engine()
@@ -29,8 +30,8 @@ Engine::~Engine()
 
 int Engine::run(Activity* activity)
 {
-	_userActivity = activity;
-	_userActivity->onCreate(state->savedState);
+	userActivity = activity;
+	userActivity->onCreate(state->savedState);
 	loopState = STOPPED;
 	
 	while (true)
@@ -48,7 +49,7 @@ int Engine::run(Activity* activity)
 				}
 			}
 		}
-		_userActivity->onUpdate();
+		userActivity->onProcessApp();
 	}
 }
 
@@ -59,16 +60,21 @@ void Engine::finish(int status)
 	exitCode = status;
 }
 
-void Engine::activityProc(int cmd)
+int Engine::inputProc(android_app* android, AInputEvent* event)
+{
+	return userActivity->onInputEvent(event);
+}
+
+void Engine::activityProc(android_app* android, int cmd)
 {
 	switch (cmd)
 	{
 		case APP_CMD_START:
-			_userActivity->onStart();
+			userActivity->onStart();
 			break;
 			
 		case APP_CMD_RESUME:
-			_userActivity->onResume();
+			userActivity->onResume();
 			break;
 			
 		case APP_CMD_INIT_WINDOW:
@@ -77,39 +83,39 @@ void Engine::activityProc(int cmd)
 				finish(-1);
 				break;
 			}
-			_userActivity->onSurfaceCreated();
-			_userActivity->onSurfaceChanged(window->width(), window->height());
+			userActivity->onSurfaceCreated();
+			userActivity->onSurfaceChanged(window->width(), window->height());
 			loopState = RUNNING;
 			break;
 			
 		case APP_CMD_GAINED_FOCUS:
-			_userActivity->onGainedFocus();
+			userActivity->onGainedFocus();
 			break;
 			
 		case APP_CMD_PAUSE:
-			_userActivity->onPause();
+			userActivity->onPause();
 			break;
 			
 		case APP_CMD_LOST_FOCUS:
-			_userActivity->onLostFocus();
+			userActivity->onLostFocus();
 			break;
 			
 		case APP_CMD_STOP:
-			_userActivity->onStop();
+			userActivity->onStop();
 			break;
 			
 		case APP_CMD_TERM_WINDOW:
 			window->destroy();
-			_userActivity->onSurfaceDestroyed();
+			userActivity->onSurfaceDestroyed();
 			loopState = STOPPED;
 			break;
 			
 		case APP_CMD_DESTROY:
-			_userActivity->onDestroy();
+			userActivity->onDestroy();
 			break;
 			
 		case APP_CMD_SAVE_STATE:
-			_userActivity->onSaveInstanceState(&state->savedState);
+			userActivity->onSaveInstanceState(&state->savedState);
 			break;
 			
 		//case APP_CMD_WINDOW_REDRAW_NEEDED:
@@ -117,34 +123,4 @@ void Engine::activityProc(int cmd)
 	}
 }
 
-int Engine::inputProc(AInputEvent* event)
-{
-	int type = AInputEvent_getType(event);
-	if (type == AINPUT_EVENT_TYPE_MOTION)
-	{
-		MotionEvent motion(event);
-		_userActivity->onTouchEvent(motion);
-		return 1;
-	}
-	return 0;
-}
-
-void Engine::activityCall(android_app* state, int cmd)
-{
-	Engine* me = (Engine*) state->userData;
-	if (me != nullptr)
-	{
-		me->activityProc(cmd);
-	}
-}
-
-int Engine::inputCall(android_app* state, AInputEvent* event)
-{
-	Engine* me = (Engine*) state->userData;
-	if (me != nullptr)
-	{
-		return me->inputProc(event);
-	}
-	return 0;
-}
 } // anut namespace

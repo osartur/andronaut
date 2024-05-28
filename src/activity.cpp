@@ -1,8 +1,7 @@
+#include "activity.h"
 #include <GLES3/gl32.h>
 #include <cstdlib>
 #include <cstring>
-#include "activity.h"
-#include "event.h"
 
 namespace anut
 {
@@ -63,14 +62,15 @@ void Activity::onSurfaceChanged(int w, int h)
 	glViewport(0, 0, w, h);
 }
 
-void Activity::onUpdate()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
-void Activity::onTouchEvent(const MotionEvent& event)
+void Activity::onProcessApp()
 {
 	
+}
+
+int Activity::onInputEvent(AInputEvent* event)
+{
+	// return one if the event was handled
+	return 0;
 }
 
 void Activity::onGainedFocus()
