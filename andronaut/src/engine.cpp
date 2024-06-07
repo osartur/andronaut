@@ -1,7 +1,7 @@
 #include <android/native_activity.h>
 #include <android/window.h>
 #include <android/input.h>
-#include "android_native_app_glue.h"
+#include "vendor/android_native_app_glue.h"
 #include "activity.h"
 #include "engine.h"
 #include "window.h"
