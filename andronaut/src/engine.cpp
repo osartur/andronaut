@@ -33,7 +33,6 @@ int Engine::run(Activity* activity)
 	userActivity = activity;
 	userActivity->onCreate(state->savedState);
 	loopState = STOPPED;
-	
 	while (true)
 	{
 		android_poll_source* source = nullptr;

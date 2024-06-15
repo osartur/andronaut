@@ -68,6 +68,12 @@ void VertexLayout::indexBuffer(const GPUBuffer& target)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+void VertexLayout::vertexAttribFrequency(unsigned attribIndex, unsigned divisor)
+{
+	glBindVertexArray(_id);
+	glVertexAttribDivisor(attribIndex, divisor);
+}
+
 void VertexLayout::draw(GLenum primitive, int count) const
 {
 	glBindVertexArray(_id);
@@ -79,5 +85,18 @@ void VertexLayout::drawIndexed(GLenum primitive, int count, GLenum indexType) co
 	glBindVertexArray(_id);
 	glDrawElements(primitive, count, indexType, (void*) 0);
 }
+
+void VertexLayout::drawInstanced(GLenum primitive, int count, int instanceCount) const
+{
+	glBindVertexArray(_id);
+	glDrawArraysInstanced(primitive, 0, count, instanceCount);
+}
+
+void VertexLayout::drawIndexedInstanced(GLenum primitive, int count, GLenum indexType, int instanceCount) const
+{
+	glBindVertexArray(_id);
+	glDrawElementsInstanced(primitive, count, indexType, (void*) 0, instanceCount);
+}
+
 } // anut namespace
 

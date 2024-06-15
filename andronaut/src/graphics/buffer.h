@@ -39,8 +39,11 @@ public:
 	
 	void vertexBuffer(unsigned attribIndex, const GPUBuffer& target, int subAttribCount, GLenum subAttribType, bool normalized, int stride, int offset);
 	void indexBuffer(const GPUBuffer& target);
+	void vertexAttribFrequency(unsigned attribIndex, unsigned divisor);
 	void draw(GLenum primitive, int count) const;
 	void drawIndexed(GLenum primitive, int count, GLenum indexType) const;
+	void drawInstanced(GLenum primitive, int count, int instanceCount) const;
+	void drawIndexedInstanced(GLenum primitive, int count, GLenum indexType, int instanceCount) const;
 	
 private:
 	unsigned _id;

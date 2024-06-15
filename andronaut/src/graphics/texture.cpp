@@ -2,6 +2,13 @@
 #include "vendor/stb_image.h"
 #include <cstdint>
 
+namespace anut
+{
+void Texture::pixelStorageMode(GLenum storageParam, int value)
+{
+	glPixelStorei(storageParam, value);
+}
+
 Texture::Texture(GLenum type)
 {
 	glGenTextures(1, &_textureId);
@@ -13,7 +20,7 @@ Texture::~Texture()
 	glDeleteTextures(1, &_textureId);
 }
 
-bool Texture::loadImage(const char* filename, GLenum format, GLint internalFormat, bool mipmap)
+bool Texture::loadImage(const char* filename, GLint textureFormat, GLenum imageFormat, bool mipmap)
 {
 	stbi_set_flip_vertically_on_load(true);
 	int width, height, colorChannels;
@@ -23,7 +30,7 @@ bool Texture::loadImage(const char* filename, GLenum format, GLint internalForma
 		return false;
 	}
 	glBindTexture(_type, _textureId);
-	glTexImage2D(_type, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(_type, 0, textureFormat, width, height, 0, imageFormat, GL_UNSIGNED_BYTE, data);
 	if (mipmap)
 	{
 		glGenerateMipmap(_type);
@@ -38,9 +45,10 @@ void Texture::parameter(GLenum textureParam, int value)
 	glTexParameteri(_type, textureParam, value);
 }
 
-// static
-void Texture::pixelStorageMode(GLenum storageParam, int value)
+void Texture::bindToUnit(GLenum textureUnit)
 {
-	glPixelStorei(storageParam, value);
+	glActiveTexture(textureUnit);
+	glBindTexture(_type, _textureId);
 }
+} // anut namespace
 

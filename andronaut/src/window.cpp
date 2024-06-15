@@ -67,7 +67,14 @@ bool Window::init(ANativeWindow* hNW, ANativeActivity* hNA)
 	_activity = hNA;
 	_width = ANativeWindow_getWidth(hNW);
 	_height = ANativeWindow_getHeight(hNW);
-	_aspect = (float) _width / (float) _height;
+	if (_width > _height)
+	{
+		_aspect = (float) _width / (float) _height;
+	}
+	else
+	{
+		_aspect = (float) _height / (float) _width;
+	}
 	
 	return true;
 }
