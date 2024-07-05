@@ -13,16 +13,15 @@ public:
 	           minDepthSize, minStencilSize;
 	
 	Window();
-	
 	bool init(ANativeWindow* hNW, ANativeActivity* hNA);
 	void destroy();
-	
+	// use only after init the window (onSurfaceCreated)
+	void display() const;
+	void setFlags(unsigned flags, unsigned mask);
+	void vsync(bool on);
 	int width() const;
 	int height() const;
 	float aspectRatio() const;
-	
-	void display() const;
-	void setFlags(unsigned flags, unsigned mask);
 	
 private:
 	bool chooseConfig(const int attributes[]);
@@ -55,15 +54,6 @@ inline float Window::aspectRatio() const
 	return _aspect;
 }
 
-inline void Window::display() const
-{
-	eglSwapBuffers(_display, _surface);
-}
-
-inline void Window::setFlags(unsigned flags, unsigned mask)
-{
-	ANativeActivity_setWindowFlags(_activity, flags, mask);
-}
 } // anut namespace
 
 #endif

@@ -23,6 +23,21 @@ Window::Window()
 	memset(this, 0, sizeof(Window));
 }
 
+void Window::display() const
+{
+	eglSwapBuffers(_display, _surface);
+}
+
+void Window::setFlags(unsigned flags, unsigned mask)
+{
+	ANativeActivity_setWindowFlags(_activity, flags, mask);
+}
+
+void Window::vsync(bool on)
+{
+    eglSwapInterval(_display, (int) on);
+}
+
 bool Window::init(ANativeWindow* hNW, ANativeActivity* hNA)
 {
 	const int windowAttributes[] =
@@ -58,12 +73,9 @@ bool Window::init(ANativeWindow* hNW, ANativeActivity* hNA)
 	{
 		return false;
 	}
-	
 	_surface = EGL_CALL(eglCreateWindowSurface(_display, _config, hNW, surfaceConfig));
 	_context = EGL_CALL(eglCreateContext(_display, _config, EGL_NO_CONTEXT, contextConfig));
 	EGL_CALL(eglMakeCurrent(_display, _surface, _surface, _context));
-	EGL_CALL(eglSwapInterval(_display, 0));
-	
 	_activity = hNA;
 	_width = ANativeWindow_getWidth(hNW);
 	_height = ANativeWindow_getHeight(hNW);
@@ -75,7 +87,6 @@ bool Window::init(ANativeWindow* hNW, ANativeActivity* hNA)
 	{
 		_aspect = (float) _height / (float) _width;
 	}
-	
 	return true;
 }
 
