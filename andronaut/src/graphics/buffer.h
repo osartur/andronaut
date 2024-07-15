@@ -11,7 +11,7 @@ public:
 	virtual ~GPUBuffer();
 	
 	void alloc(GLsizeiptr size, GLenum usage, const void* initialData = nullptr);
-	void copyData(const void* data, GLsizeiptr size, GLintptr offset = 0 * sizeof(float));
+	void copyData(const void* data, GLsizeiptr size, GLintptr offset = 0 * sizeof(0));
 	unsigned resourceId() const;
 	GLenum type() const;
 	
