@@ -12,51 +12,50 @@ Timer::Timer()
 	start();
 }
 
-void Timer::start()
+Timer::TimePoint Timer::now()
 {
+	return Clock::now();
+}
+
+float Timer::timeSince(const TimePoint& markTime)
+{
+	auto elapsed = now() - markTime;
+	return duration_cast<duration<float>>(elapsed).count();
+}
+
+float Timer::timeSince(const TimePoint& pointA, const TimePoint& pointB)
+{
+	auto elapsed = pointB - pointA;
+	return duration_cast<duration<float>>(elapsed).count();
+}
+
+float Timer::start()
+{
+	TimePoint rightNow = now();
+	decltype(_pausePoint - _startPoint) deltaTime;
 	if (_paused)
 	{
-		auto elapsed = _end - _start;
-		_start = now() - elapsed;
+		deltaTime = _pausePoint - _startPoint;
+		_startPoint = rightNow - deltaTime;
 		_paused = false;
 	}
 	else
 	{
-		_start = now();
+		deltaTime = rightNow - _startPoint;
+		_startPoint = rightNow;
 	}
+	return duration_cast<duration<float>>(deltaTime).count();
 }
 
 void Timer::pause()
 {
-	if (!_paused)
-	{
-		_end = now();
-		_paused = true;
-	}
-}
-
-float Timer::restart()
-{
-	std::chrono::high_resolution_clock::duration elapsed;
-	if (_paused)
-	{
-		elapsed = _end - _start;
-		_start = now() - elapsed;
-		_paused = false;
-	}
-	else
-	{
-		auto right_now = now();
-		elapsed = right_now - _start;
-		_start = right_now;
-	}
-	return duration_cast<duration<float>>(elapsed).count();
+	_pausePoint = now();
+	_paused = true;
 }
 
 float Timer::elapsed() const
 {
-	auto end = _paused ? _end : now();
-	auto elapsed = duration_cast<duration<float>>(end - _start);
-	return elapsed.count();
+	TimePoint mark = _paused ? _pausePoint : now();
+	return timeSince(_startPoint, mark);
 }
 } // anut namespace

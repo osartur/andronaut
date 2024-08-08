@@ -7,32 +7,37 @@ namespace anut
 class Timer
 {
 public:
+	using Clock = std::chrono::high_resolution_clock;
+	using TimePoint = Clock::time_point;
+	
+	static TimePoint now();
+	static float timeSince(const TimePoint& markTime);
+	static float timeSince(const TimePoint& pointA, const TimePoint& pointB);
+	
 	Timer();
 	virtual ~Timer() = default;
 	
-	void start();
+	float start();
+	float restart(); // Wrap function for start()
 	void pause();
-	float restart();
 	float elapsed() const;
 	bool isPaused() const;
 	
 private:
-	static std::chrono::high_resolution_clock::time_point now();
-	
-	std::chrono::high_resolution_clock::time_point _start;
-	std::chrono::high_resolution_clock::time_point _end;
+	TimePoint _startPoint;
+	TimePoint _pausePoint;
 	bool _paused;
 };
 
 
+inline float Timer::restart()
+{
+	return start();
+}
+
 inline bool Timer::isPaused() const
 {
 	return _paused;
-}
-
-inline std::chrono::high_resolution_clock::time_point Timer::now()
-{
-	return std::chrono::high_resolution_clock::now();
 }
 } // anut namespace
 
