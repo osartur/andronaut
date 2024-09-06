@@ -4,20 +4,34 @@
 
 namespace anut
 {
-void Texture::pixelStorageMode(GLenum storageParam, int value)
+void Texture::setPixelStorageMode(GLenum storageParam, int value)
 {
 	glPixelStorei(storageParam, value);
 }
 
 Texture::Texture(GLenum type)
 {
-	glGenTextures(1, &_textureId);
 	_type = type;
 }
 
 Texture::~Texture()
 {
-	glDeleteTextures(1, &_textureId);
+	shutdown();
+}
+
+bool Texture::init()
+{
+	glGenTextures(1, &handle);
+	return true;
+}
+
+void Texture::shutdown()
+{
+	if (initialized())
+	{
+		glDeleteTextures(1, &handle);
+		handle = 0;
+	}
 }
 
 bool Texture::loadImage(const char* filename, GLint textureFormat, GLenum imageFormat, bool mipmap)
@@ -29,7 +43,7 @@ bool Texture::loadImage(const char* filename, GLint textureFormat, GLenum imageF
 	{
 		return false;
 	}
-	glBindTexture(_type, _textureId);
+	glBindTexture(_type, handle);
 	glTexImage2D(_type, 0, textureFormat, width, height, 0, imageFormat, GL_UNSIGNED_BYTE, data);
 	if (mipmap)
 	{
@@ -39,16 +53,16 @@ bool Texture::loadImage(const char* filename, GLint textureFormat, GLenum imageF
 	return true;
 }
 
-void Texture::parameter(GLenum textureParam, int value)
+void Texture::setParameter(GLenum textureParam, int value)
 {
-	glBindTexture(_type, _textureId);
+	glBindTexture(_type, handle);
 	glTexParameteri(_type, textureParam, value);
 }
 
 void Texture::bindToUnit(GLenum textureUnit)
 {
 	glActiveTexture(textureUnit);
-	glBindTexture(_type, _textureId);
+	glBindTexture(_type, handle);
 }
 } // anut namespace
 

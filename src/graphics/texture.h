@@ -1,34 +1,30 @@
 #if not defined(ANUT_TEXTURE_H)
 #define ANUT_TEXTURE_H
+#include "graphics/gpuResource.h"
 #include <GLES3/gl32.h>
 
 namespace anut
 {
-class Texture
+class Texture : public anut::GPUResource
 {
 public:
-	static void pixelStorageMode(GLenum storageParam, int value);
+	static void setPixelStorageMode(GLenum storageParam, int value);
 	
 	Texture(GLenum type);
 	~Texture();
 	
+	bool init() override;
+	void shutdown() override;
 	bool loadImage(const char* filename, GLint textureFormat, GLenum imageFormat, bool mipmap);
-	void parameter(GLenum textureParam, int value);
+	void setParameter(GLenum textureParam, int value);
 	void bindToUnit(GLenum textureUnit);
-	unsigned resourceId() const;
-	GLenum type() const;
+	GLenum getTextureType() const;
 	
 private:
-	unsigned _textureId;
 	GLenum _type;
 };
 
-inline unsigned Texture::resourceId() const
-{
-	return _textureId;
-}
-
-inline GLenum Texture::type() const
+inline GLenum Texture::getTextureType() const
 {
 	return _type;
 }

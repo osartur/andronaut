@@ -1,10 +1,10 @@
+#include "vendor/android_native_app_glue.h"
+#include "system/activity.h"
+#include "system/engine.h"
+#include "system/window.h"
 #include <android/native_activity.h>
 #include <android/window.h>
 #include <android/input.h>
-#include "vendor/android_native_app_glue.h"
-#include "activity.h"
-#include "engine.h"
-#include "window.h"
 
 namespace anut
 {

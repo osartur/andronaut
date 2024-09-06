@@ -9,22 +9,22 @@ namespace anut
 class Shader
 {
 public:
-	Shader(unsigned shaderId);
+	Shader(unsigned shaderProgram);
 	Shader();
 	~Shader();
 	
-	int uniform(const std::string& uniformName);
+	int getUniformLocation(const std::string& uniformName);
 	void use();
 	
 private:
-	unsigned _id;
+	unsigned _program;
 	std::unordered_map<std::string, int> _uniformCache;
 };
 
 
 inline void Shader::use()
 {
-	glUseProgram(_id);
+	glUseProgram(_program);
 }
 } // anut namespace
 

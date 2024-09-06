@@ -1,5 +1,5 @@
-#include "window.h"
-#include "android_native_app_glue.h"
+#include "system/window.h"
+#include "vendor/android_native_app_glue.h"
 #include <EGL/eglext.h>
 #include <cstring>
 #include <vector>

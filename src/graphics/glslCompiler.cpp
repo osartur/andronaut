@@ -1,6 +1,6 @@
 #include "graphics/glslCompiler.h"
-#include "utils/fileop.h"
 #include <sstream>
+#include <fstream>
 
 namespace anut
 {
@@ -25,9 +25,7 @@ bool GLSLCompiler::compile(const char* vertFilename, const char* fragFilename)
 	_vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	_fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	
-	if (!(compile(_vertexShader, vertFilename) &&
-	      compile(_fragmentShader, fragFilename) &&
-	      link()))
+	if (!compile())
 	{
 		logErrors();
 		_hasFailed = true;
@@ -36,15 +34,38 @@ bool GLSLCompiler::compile(const char* vertFilename, const char* fragFilename)
 	return true;
 }
 
+bool GLSLCompiler::compile()
+{
+	return compile(_vertexShader, _vertexShaderFilename) 
+	    && compile(_fragmentShader, _fragmentShaderFilename)
+	    && link();
+}
+
 bool GLSLCompiler::compile(unsigned shader, const char* sourceFile)
 {
-	std::string content = readFileContent(sourceFile);
+	std::string content = getFileContent(sourceFile);
 	const char* code = content.c_str();
 	glShaderSource(shader, 1, &code, nullptr);
 	glCompileShader(shader);
 	int status;
 	glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
 	return status == GL_TRUE;
+}
+
+std::string GLSLCompiler::getFileContent(const char* filename)
+{
+	std::ifstream f{filename};
+	if (!f.is_open())
+	{
+		return "";
+	}
+	std::string line, content;
+	while (std::getline(f, line))
+	{
+		content += line + '\n';
+	}
+	f.close();
+	return content;
 }
 
 bool GLSLCompiler::link()
@@ -61,16 +82,16 @@ void GLSLCompiler::logErrors()
 {
 	std::stringstream status;
 	status << "[!] " << _vertexShaderFilename << ":\n"
-	       << shaderStatus(_vertexShader) << "\n\n";
+	       << getShaderStatus(_vertexShader) << "\n\n";
 	
 	status << "[!] " << _fragmentShaderFilename << ":\n"
-	       << shaderStatus(_fragmentShader) << "\n\n";
+	       << getShaderStatus(_fragmentShader) << "\n\n";
 	
-	status << "[!] linker:\n" << linkerStatus() << "\n";
+	status << "[!] linker:\n" << getLinkerStatus() << "\n";
 	_log = status.str();
 }
 
-std::string GLSLCompiler::shaderStatus(unsigned shader) const
+std::string GLSLCompiler::getShaderStatus(unsigned shader) const
 {
 	int len;
 	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
@@ -84,7 +105,7 @@ std::string GLSLCompiler::shaderStatus(unsigned shader) const
 	return message;
 }
 
-std::string GLSLCompiler::linkerStatus() const
+std::string GLSLCompiler::getLinkerStatus() const
 {
 	int len;
 	glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &len);

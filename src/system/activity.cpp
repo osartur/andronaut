@@ -1,4 +1,4 @@
-#include "activity.h"
+#include "system/activity.h"
 #include <GLES3/gl32.h>
 #include <cstdlib>
 #include <cstring>

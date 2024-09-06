@@ -12,16 +12,18 @@ public:
 	virtual ~GLSLCompiler();
 	
 	bool compile(const char* vertFilename, const char* fragFilename);
-	const std::string& status() const;
-	unsigned shaderId() const;
+	unsigned getCompiledProgram() const;
+	const std::string& getStatus() const;
 	
 private:
+	bool compile();
 	bool compile(unsigned shader, const char* sourceFile);
+	std::string getFileContent(const char* filename);
 	bool link();
 	void reset();
 	void logErrors();
-	std::string shaderStatus(unsigned shader) const;
-	std::string linkerStatus() const;
+	std::string getShaderStatus(unsigned shader) const;
+	std::string getLinkerStatus() const;
 	
 	const char* _vertexShaderFilename;
 	const char* _fragmentShaderFilename;
@@ -32,12 +34,12 @@ private:
 	bool _hasFailed;
 };
 
-inline const std::string& GLSLCompiler::status() const
+inline const std::string& GLSLCompiler::getStatus() const
 {
 	return _log;
 }
 
-inline unsigned GLSLCompiler::shaderId() const 
+inline unsigned GLSLCompiler::getCompiledProgram() const 
 {
 	return _hasFailed ? 0u : _program;
 }

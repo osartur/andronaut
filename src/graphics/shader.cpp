@@ -2,26 +2,26 @@
 
 namespace anut
 {
-Shader::Shader(unsigned shaderId)
+Shader::Shader(unsigned shaderProgram)
 {
-	_id = shaderId;
+	_program = shaderProgram;
 }
 
 Shader::Shader()
 {
-	_id = 0;
+	_program = 0;
 }
 
 Shader::~Shader()
 {
-	if (_id != 0)
+	if (_program != 0)
 	{
-		glDeleteShader(_id);
-		_id = 0;
+		glDeleteShader(_program);
+		_program = 0;
 	}
 }
 
-int Shader::uniform(const std::string& uniformName)
+int Shader::getUniformLocation(const std::string& uniformName)
 {
 	auto ref = _uniformCache.find(uniformName);
 	if (ref != _uniformCache.end())
@@ -29,7 +29,7 @@ int Shader::uniform(const std::string& uniformName)
 		return ref->second;
 	}
 	
-	int location = glGetUniformLocation(_id, uniformName.c_str());
+	int location = glGetUniformLocation(_program, uniformName.c_str());
 	if (location != -1)
 	{
 		_uniformCache[uniformName] = location;
