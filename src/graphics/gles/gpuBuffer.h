@@ -1,11 +1,13 @@
 #if not defined(ANUT_BUFFER_H)
 #define ANUT_BUFFER_H
-#include "graphics/gpuResource.h"
+#include "graphics/gles/gpuResource.h"
 #include <GLES3/gl32.h>
 
 namespace anut
 {
-class GPUBuffer : public anut::GPUResource
+namespace gl
+{
+class GPUBuffer : public anut::gl::GPUResource
 {
 public:
 	GPUBuffer(GLenum bufferType);
@@ -25,6 +27,8 @@ inline GLenum GPUBuffer::getBufferType() const
 {
 	return _type;
 }
+
+} // gl namespace
 } // anut namespace
 
 #endif

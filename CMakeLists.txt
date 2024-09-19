@@ -6,8 +6,7 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 file(GLOB SRC_FILES
     "${SRC_DIR}/system/*.cpp"
     "${SRC_DIR}/vendor/*.cpp"
-    "${SRC_DIR}/graphics/*.cpp"
-    "${SRC_DIR}/utils/*.cpp"
+    "${SRC_DIR}/graphics/gles/*.cpp"
 )
 
 add_library(andronaut OBJECT "${SRC_FILES}")

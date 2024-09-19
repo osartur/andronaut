@@ -6,6 +6,8 @@
 
 namespace anut
 {
+namespace gl
+{
 class Shader
 {
 public:
@@ -26,6 +28,7 @@ inline void Shader::use()
 {
 	glUseProgram(_program);
 }
+} // gl namespace
 } // anut namespace
 
 #endif

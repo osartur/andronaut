@@ -1,7 +1,9 @@
-#include "graphics/vertexLayout.h"
-#include "graphics/gpuBuffer.h"
+#include "graphics/gles/vertexLayout.h"
+#include "graphics/gles/gpuBuffer.h"
 
 namespace anut
+{
+namespace gl
 {
 VertexLayout::VertexLayout()
 {
@@ -85,4 +87,5 @@ void VertexLayout::drawIndexedInstanced(GLenum primitive, int count, GLenum inde
 	glBindVertexArray(handle);
 	glDrawElementsInstanced(primitive, count, indexType, (void*) 0, instanceCount);
 }
+} // gl namespace
 } // anut namespace

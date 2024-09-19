@@ -1,13 +1,15 @@
 #if not defined(ANUT_VERTEX_LAYOUT_H)
 #define ANUT_VERTEX_LAYOUT_H
-#include "graphics/gpuResource.h"
+#include "graphics/gles/gpuResource.h"
 #include <GLES3/gl32.h>
 
 namespace anut
 {
+namespace gl
+{
 class GPUBuffer;
 	
-class VertexLayout : public anut::GPUResource
+class VertexLayout : public anut::gl::GPUResource
 {
 public:
 	VertexLayout();
@@ -23,7 +25,8 @@ public:
 	void drawInstanced(GLenum primitive, int count, int instanceCount) const;
 	void drawIndexedInstanced(GLenum primitive, int count, GLenum indexType, int instanceCount) const;
 };
-}
+} // gl namespace
+} // anut namespace
 
 #endif
 

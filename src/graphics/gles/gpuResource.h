@@ -4,6 +4,8 @@
 
 namespace anut
 {
+namespace gl
+{
 class GPUResource 
 {
 public:
@@ -30,6 +32,7 @@ inline unsigned GPUResource::getResourceId() const
 {
 	return handle;
 }
-}
+} // gl namespace
+} // anut namespace
 
 #endif

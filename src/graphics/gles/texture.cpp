@@ -1,8 +1,10 @@
-#include "graphics/texture.h"
+#include "graphics/gles/texture.h"
 #include "vendor/stb_image.h"
 #include <cstdint>
 
 namespace anut
+{
+namespace gl
 {
 void Texture::setPixelStorageMode(GLenum storageParam, int value)
 {
@@ -16,7 +18,7 @@ Texture::Texture(GLenum type)
 
 Texture::~Texture()
 {
-	shutdown();
+	
 }
 
 bool Texture::init()
@@ -64,5 +66,6 @@ void Texture::bindToUnit(GLenum textureUnit)
 	glActiveTexture(textureUnit);
 	glBindTexture(_type, handle);
 }
+} // gl namespace
 } // anut namespace
 

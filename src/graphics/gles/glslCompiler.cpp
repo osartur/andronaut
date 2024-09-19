@@ -1,8 +1,10 @@
-#include "graphics/glslCompiler.h"
+#include "graphics/gles/glslCompiler.h"
 #include <sstream>
 #include <fstream>
 
 namespace anut
+{
+namespace gl 
 {
 GLSLCompiler::GLSLCompiler()
 {
@@ -140,4 +142,5 @@ void GLSLCompiler::reset()
 	_vertexShaderFilename = _fragmentShaderFilename = nullptr;
 	_hasFailed = false;
 }
+} // gl namespace
 } // anut namespace

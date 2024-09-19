@@ -1,6 +1,8 @@
-#include "graphics/gpuBuffer.h"
+#include "graphics/gles/gpuBuffer.h"
 
 namespace anut
+{
+namespace gl 
 {
 GPUBuffer::GPUBuffer(GLenum bufferType)
 {
@@ -9,7 +11,7 @@ GPUBuffer::GPUBuffer(GLenum bufferType)
 
 GPUBuffer::~GPUBuffer()
 {
-	shutdown();
+	
 }
 
 bool GPUBuffer::init()
@@ -38,5 +40,6 @@ void GPUBuffer::copyData(const void* data, GLsizeiptr size, GLintptr offset)
 	glBindBuffer(_type, handle);
 	glBufferSubData(_type, offset, size, data);
 }
+} // gl namespace
 } // anut namespace
 

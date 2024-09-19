@@ -1,6 +1,8 @@
-#include "graphics/shader.h"
+#include "graphics/gles/shader.h"
 
 namespace anut
+{
+namespace gl
 {
 Shader::Shader(unsigned shaderProgram)
 {
@@ -37,5 +39,6 @@ int Shader::getUniformLocation(const std::string& uniformName)
 	
 	return location;
 }
+} // gl namespace
 } // anut namespace
 
