@@ -10,9 +10,9 @@ public:
 	using Clock = std::chrono::high_resolution_clock;
 	using TimePoint = Clock::time_point;
 	
-	static TimePoint now();
-	static float timeSince(const TimePoint& markTime);
-	static float timeSince(const TimePoint& pointA, const TimePoint& pointB);
+	static TimePoint getCurrentTimePoint();
+	static float getTimeSince(const TimePoint& markTime);
+	static float getTimeSince(const TimePoint& pointA, const TimePoint& pointB);
 	
 	Timer();
 	virtual ~Timer() = default;
@@ -20,7 +20,7 @@ public:
 	float start();
 	float restart(); // Wrap function for start()
 	void pause();
-	float elapsed() const;
+	float getElapsedTime() const;
 	bool isPaused() const;
 	
 private:

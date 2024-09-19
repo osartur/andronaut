@@ -13,15 +13,17 @@ public:
 	           minDepthSize, minStencilSize;
 	
 	Window();
+	
 	bool init(ANativeWindow* hNW, ANativeActivity* hNA);
 	void destroy();
 	// use only after init the window (onSurfaceCreated)
 	void display() const;
 	void setFlags(unsigned flags, unsigned mask);
-	void vsync(bool on);
-	int width() const;
-	int height() const;
-	float aspectRatio() const;
+	void enableVSync();
+	void disableVSync();
+	int getWidth() const;
+	int getHeight() const;
+	float getAspectRatio() const;
 	
 private:
 	bool chooseConfig(const int attributes[]);
@@ -39,17 +41,17 @@ private:
 };
 
 
-inline int Window::width() const
+inline int Window::getWidth() const
 {
 	return _width;
 }
 
-inline int Window::height() const
+inline int Window::getHeight() const
 {
 	return _height;
 }
 
-inline float Window::aspectRatio() const
+inline float Window::getAspectRatio() const
 {
 	return _aspect;
 }

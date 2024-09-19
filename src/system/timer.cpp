@@ -12,18 +12,18 @@ Timer::Timer()
 	start();
 }
 
-Timer::TimePoint Timer::now()
+Timer::TimePoint Timer::getCurrentTimePoint()
 {
 	return Clock::now();
 }
 
-float Timer::timeSince(const TimePoint& markTime)
+float Timer::getTimeSince(const TimePoint& markTime)
 {
-	auto elapsed = now() - markTime;
+	auto elapsed = getCurrentTimePoint() - markTime;
 	return duration_cast<duration<float>>(elapsed).count();
 }
 
-float Timer::timeSince(const TimePoint& pointA, const TimePoint& pointB)
+float Timer::getTimeSince(const TimePoint& pointA, const TimePoint& pointB)
 {
 	auto elapsed = pointB - pointA;
 	return duration_cast<duration<float>>(elapsed).count();
@@ -31,31 +31,31 @@ float Timer::timeSince(const TimePoint& pointA, const TimePoint& pointB)
 
 float Timer::start()
 {
-	TimePoint rightNow = now();
+	TimePoint rightnow = getCurrentTimePoint();
 	decltype(_pausePoint - _startPoint) deltaTime;
 	if (_paused)
 	{
 		deltaTime = _pausePoint - _startPoint;
-		_startPoint = rightNow - deltaTime;
+		_startPoint = rightnow - deltaTime;
 		_paused = false;
 	}
 	else
 	{
-		deltaTime = rightNow - _startPoint;
-		_startPoint = rightNow;
+		deltaTime = rightnow - _startPoint;
+		_startPoint = rightnow;
 	}
 	return duration_cast<duration<float>>(deltaTime).count();
 }
 
 void Timer::pause()
 {
-	_pausePoint = now();
+	_pausePoint = getCurrentTimePoint();
 	_paused = true;
 }
 
-float Timer::elapsed() const
+float Timer::getElapsedTime() const
 {
-	TimePoint mark = _paused ? _pausePoint : now();
-	return timeSince(_startPoint, mark);
+	TimePoint mark = _paused ? _pausePoint : getCurrentTimePoint();
+	return getTimeSince(_startPoint, mark);
 }
 } // anut namespace

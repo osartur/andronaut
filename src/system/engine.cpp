@@ -83,7 +83,7 @@ void Engine::activityProc(android_app* android, int cmd)
 				break;
 			}
 			userActivity->onSurfaceCreated();
-			userActivity->onSurfaceChanged(window->width(), window->height());
+			userActivity->onSurfaceChanged(window->getWidth(), window->getHeight());
 			loopState = RUNNING;
 			break;
 			

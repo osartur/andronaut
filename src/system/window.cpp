@@ -33,9 +33,14 @@ void Window::setFlags(unsigned flags, unsigned mask)
 	ANativeActivity_setWindowFlags(_activity, flags, mask);
 }
 
-void Window::vsync(bool on)
+void Window::enableVSync()
 {
-    eglSwapInterval(_display, (int) on);
+    eglSwapInterval(_display, 1);
+}
+
+void Window::disableVSync()
+{
+    eglSwapInterval(_display, 0);
 }
 
 bool Window::init(ANativeWindow* hNW, ANativeActivity* hNA)
