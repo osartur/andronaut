@@ -4,40 +4,40 @@ namespace anut
 {
 namespace gl 
 {
-GPUBuffer::GPUBuffer(GLenum bufferType)
+GpuBuffer::GpuBuffer(GLenum bufferType)
 {
 	_type = bufferType;
 }
 
-GPUBuffer::~GPUBuffer()
+GpuBuffer::~GpuBuffer()
 {
 	
 }
 
-bool GPUBuffer::init()
+bool GpuBuffer::init()
 {
-	glGenBuffers(1, &handle);
+	glGenBuffers(1, &__handle);
 	return true;
 }
 
-void GPUBuffer::shutdown()
+void GpuBuffer::shutdown()
 {
 	if (initialized())
 	{
-		glDeleteBuffers(1, &handle);
-		handle = 0;
+		glDeleteBuffers(1, &__handle);
+		__handle = 0;
 	}
 }
 
-void GPUBuffer::alloc(GLsizeiptr size, GLenum usage, const void* initialData)
+void GpuBuffer::alloc(GLsizeiptr size, GLenum usage, const void* initialData)
 {
-	glBindBuffer(_type, handle);
+	glBindBuffer(_type, __handle);
 	glBufferData(_type, size, initialData, usage);
 }
 
-void GPUBuffer::copyData(const void* data, GLsizeiptr size, GLintptr offset)
+void GpuBuffer::copyData(const void* data, GLsizeiptr size, GLintptr offset)
 {
-	glBindBuffer(_type, handle);
+	glBindBuffer(_type, __handle);
 	glBufferSubData(_type, offset, size, data);
 }
 } // gl namespace

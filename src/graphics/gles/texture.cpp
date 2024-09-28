@@ -23,7 +23,7 @@ Texture::~Texture()
 
 bool Texture::init()
 {
-	glGenTextures(1, &handle);
+	glGenTextures(1, &__handle);
 	return true;
 }
 
@@ -31,8 +31,8 @@ void Texture::shutdown()
 {
 	if (initialized())
 	{
-		glDeleteTextures(1, &handle);
-		handle = 0;
+		glDeleteTextures(1, &__handle);
+		__handle = 0;
 	}
 }
 
@@ -45,7 +45,7 @@ bool Texture::loadImage(const char* filename, GLint textureFormat, GLenum imageF
 	{
 		return false;
 	}
-	glBindTexture(_type, handle);
+	glBindTexture(_type, __handle);
 	glTexImage2D(_type, 0, textureFormat, width, height, 0, imageFormat, GL_UNSIGNED_BYTE, data);
 	if (mipmap)
 	{
@@ -57,14 +57,14 @@ bool Texture::loadImage(const char* filename, GLint textureFormat, GLenum imageF
 
 void Texture::setParameter(GLenum textureParam, int value)
 {
-	glBindTexture(_type, handle);
+	glBindTexture(_type, __handle);
 	glTexParameteri(_type, textureParam, value);
 }
 
 void Texture::bindToUnit(GLenum textureUnit)
 {
 	glActiveTexture(textureUnit);
-	glBindTexture(_type, handle);
+	glBindTexture(_type, __handle);
 }
 } // gl namespace
 } // anut namespace

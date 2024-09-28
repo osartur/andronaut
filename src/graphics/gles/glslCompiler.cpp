@@ -6,19 +6,19 @@ namespace anut
 {
 namespace gl 
 {
-GLSLCompiler::GLSLCompiler()
+GlslCompiler::GlslCompiler()
 {
 	_program = _vertexShader = _fragmentShader = 0u;
 	_vertexShaderFilename = _fragmentShaderFilename = nullptr;
 	_hasFailed = false;
 }
 
-GLSLCompiler::~GLSLCompiler()
+GlslCompiler::~GlslCompiler()
 {
 	reset();
 }
 
-bool GLSLCompiler::compile(const char* vertFilename, const char* fragFilename)
+bool GlslCompiler::compile(const char* vertFilename, const char* fragFilename)
 {
 	reset();
 	_vertexShaderFilename = vertFilename;
@@ -36,14 +36,14 @@ bool GLSLCompiler::compile(const char* vertFilename, const char* fragFilename)
 	return true;
 }
 
-bool GLSLCompiler::compile()
+bool GlslCompiler::compile()
 {
 	return compile(_vertexShader, _vertexShaderFilename) 
 	    && compile(_fragmentShader, _fragmentShaderFilename)
 	    && link();
 }
 
-bool GLSLCompiler::compile(unsigned shader, const char* sourceFile)
+bool GlslCompiler::compile(unsigned shader, const char* sourceFile)
 {
 	std::string content = getFileContent(sourceFile);
 	const char* code = content.c_str();
@@ -54,7 +54,7 @@ bool GLSLCompiler::compile(unsigned shader, const char* sourceFile)
 	return status == GL_TRUE;
 }
 
-std::string GLSLCompiler::getFileContent(const char* filename)
+std::string GlslCompiler::getFileContent(const char* filename)
 {
 	std::ifstream f{filename};
 	if (!f.is_open())
@@ -70,7 +70,7 @@ std::string GLSLCompiler::getFileContent(const char* filename)
 	return content;
 }
 
-bool GLSLCompiler::link()
+bool GlslCompiler::link()
 {
 	glAttachShader(_program, _vertexShader);
 	glAttachShader(_program, _fragmentShader);
@@ -80,7 +80,7 @@ bool GLSLCompiler::link()
 	return status == GL_TRUE;
 }
 
-void GLSLCompiler::logErrors()
+void GlslCompiler::logErrors()
 {
 	std::stringstream status;
 	status << "[!] " << _vertexShaderFilename << ":\n"
@@ -93,7 +93,7 @@ void GLSLCompiler::logErrors()
 	_log = status.str();
 }
 
-std::string GLSLCompiler::getShaderStatus(unsigned shader) const
+std::string GlslCompiler::getShaderStatus(unsigned shader) const
 {
 	int len;
 	glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &len);
@@ -107,7 +107,7 @@ std::string GLSLCompiler::getShaderStatus(unsigned shader) const
 	return message;
 }
 
-std::string GLSLCompiler::getLinkerStatus() const
+std::string GlslCompiler::getLinkerStatus() const
 {
 	int len;
 	glGetProgramiv(_program, GL_INFO_LOG_LENGTH, &len);
@@ -121,7 +121,7 @@ std::string GLSLCompiler::getLinkerStatus() const
 	return message;
 }
 
-void GLSLCompiler::reset()
+void GlslCompiler::reset()
 {
 	if (_vertexShader != 0)
 	{

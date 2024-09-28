@@ -7,11 +7,11 @@ namespace anut
 {
 namespace gl
 {
-class GPUBuffer : public anut::gl::GPUResource
+class GpuBuffer : public anut::gl::GpuResource
 {
 public:
-	GPUBuffer(GLenum bufferType);
-	virtual ~GPUBuffer();
+	GpuBuffer(GLenum bufferType);
+	virtual ~GpuBuffer();
 	
 	bool init() override;
 	void shutdown() override;
@@ -23,7 +23,7 @@ private:
 	GLenum _type;
 };
 
-inline GLenum GPUBuffer::getBufferType() const
+inline GLenum GpuBuffer::getBufferType() const
 {
 	return _type;
 }

@@ -7,9 +7,9 @@ namespace anut
 {
 namespace gl
 {
-class GPUBuffer;
+class GpuBuffer;
 	
-class VertexLayout : public anut::gl::GPUResource
+class VertexLayout : public anut::gl::GpuResource
 {
 public:
 	VertexLayout();
@@ -17,8 +17,8 @@ public:
 	
 	bool init() override;
 	void shutdown() override;
-	void setVertexBuffer(const GPUBuffer& buffer, unsigned attribIndex, int subAttribCount, GLenum subAttribType, bool normalized, int stride, int offset);
-	void setIndexBuffer(const GPUBuffer& buffer);
+	void addLayout(const GpuBuffer& vb, unsigned attribIndex, int subAttribCount, GLenum subAttribType, bool normalized, int stride, int offset);
+	void setIndexBuffer(const GpuBuffer& eb);
 	void setVertexAttribFrequency(unsigned attribIndex, unsigned divisor);
 	void draw(GLenum primitive, int count) const;
 	void drawIndexed(GLenum primitive, int count, GLenum indexType) const;

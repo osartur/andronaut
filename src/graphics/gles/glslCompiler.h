@@ -7,11 +7,11 @@ namespace anut
 {
 namespace gl
 {
-class GLSLCompiler
+class GlslCompiler
 {
 public:
-	GLSLCompiler();
-	virtual ~GLSLCompiler();
+	GlslCompiler();
+	virtual ~GlslCompiler();
 	
 	bool compile(const char* vertFilename, const char* fragFilename);
 	unsigned getCompiledShader() const;
@@ -36,12 +36,12 @@ private:
 	bool _hasFailed;
 };
 
-inline const std::string& GLSLCompiler::getStatus() const
+inline const std::string& GlslCompiler::getStatus() const
 {
 	return _log;
 }
 
-inline unsigned GLSLCompiler::getCompiledShader() const 
+inline unsigned GlslCompiler::getCompiledShader() const 
 {
 	return _hasFailed ? 0u : _program;
 }

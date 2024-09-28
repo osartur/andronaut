@@ -4,15 +4,15 @@ namespace anut
 {
 namespace gl 
 {
-std::list<GPUResource*> GPUResource::allResources{};
+std::list<GpuResource*> GpuResource::allResources{};
 
-GPUResource::GPUResource()
+GpuResource::GpuResource()
 {
 	allResources.push_back(this);
-	handle = 0;
+	__handle = 0;
 }
 
-GPUResource::~GPUResource()
+GpuResource::~GpuResource()
 {
 	allResources.remove(this);
 }

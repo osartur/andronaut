@@ -6,31 +6,31 @@ namespace anut
 {
 namespace gl
 {
-class GPUResource 
+class GpuResource 
 {
 public:
-	static std::list<GPUResource*> allResources;
+	static std::list<GpuResource*> allResources;
 	
-	GPUResource();
-	virtual ~GPUResource();
+	GpuResource();
+	virtual ~GpuResource();
 	
 	virtual bool init() = 0;
 	virtual void shutdown() = 0;
 	bool initialized() const;
-	unsigned getResourceId() const;
+	unsigned getId() const;
 	
 protected:
-	unsigned handle;
+	unsigned __handle;
 };
 
-inline bool GPUResource::initialized() const
+inline bool GpuResource::initialized() const
 {
-	return handle != 0;
+	return __handle != 0;
 }
 
-inline unsigned GPUResource::getResourceId() const
+inline unsigned GpuResource::getId() const
 {
-	return handle;
+	return __handle;
 }
 } // gl namespace
 } // anut namespace

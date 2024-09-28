@@ -7,7 +7,7 @@ namespace anut
 {
 namespace gl 
 {
-class Texture : public anut::gl::GPUResource
+class Texture : public anut::gl::GpuResource
 {
 public:
 	static void setPixelStorageMode(GLenum storageParam, int value);
