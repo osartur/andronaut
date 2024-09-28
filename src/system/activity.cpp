@@ -69,7 +69,7 @@ void Activity::onProcessApp()
 
 int Activity::onInputEvent(AInputEvent* event)
 {
-	// return one if the event was handled
+	// return 1 if the event was handled
 	return 0;
 }
 
